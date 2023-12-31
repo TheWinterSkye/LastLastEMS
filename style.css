@@ -11,3 +11,20 @@
 .title {
     color: #1976d2; /* This is a shade of blue often associated with healthcare. Adjust the color as needed. */
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #1976d2; /* This is a shade of blue often associated with healthcare. Adjust the color as needed. */
+    color: white;
+}
