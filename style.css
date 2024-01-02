@@ -147,6 +147,44 @@ body {
     margin-bottom: 5px;
 }
 
+.content {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.codes-column {
+  flex: 1;
+  max-width: 50%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.ems-codes-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.ems-codes-list li {
+  background-color: #f4f4f4;
+  border-left: 4px solid #5d88a7;
+  margin-bottom: 8px;
+  padding: 8px;
+  font-size: 0.95em;
+}
+
+.code {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+  .codes-column {
+    max-width: 100%;
+  }
+}
+
 /* Responsive design */
 @media (min-width: 768px) {
     .left-column, .right-column {
