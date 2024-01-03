@@ -3,6 +3,7 @@ body {
     margin: 0;
     padding: 0;
 }
+
 .header {
     background-color: #003366;
     color: white;
@@ -11,40 +12,46 @@ body {
     align-items: center;
     flex-wrap: wrap;
 }
+
 .header-logo {
     width: 8em; /* Adjust as needed */
     height: auto;
     margin-right: 10px;
 }
+
 .title-container {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
+
 .title {
     font-size: 28px; /* Increased font size for emphasis */
     font-weight: bold;
     color: #5d88a7; /* A darker shade for more emphasis */
     margin-bottom: 0.5em; /* Added some spacing below the title */
 }
+
 .mission-statement {
     font-size: 16px; /* Adjusted for better hierarchy */
 }
+
+/* Ensures the content does not overlap the footer */
 .content {
     display: flex;
+    justify-content: space-around;
     flex-wrap: wrap;
-    margin-top: 20px;
+    margin-bottom: 100px; /* Adjust based on the actual height of your footer */
+    overflow-y: auto; /* Enables scrolling on overflow */
+    padding-bottom: 20px; /* Additional padding to ensure content does not touch the footer */
 }
-.left-column {
+
+.left-column, .right-column {
     width: 100%; /* Full width on smaller screens */
     padding: 20px;
     box-sizing: border-box;
 }
-.right-column {
-    width: 100%; /* Full width on smaller screens */
-    padding: 20px;
-    box-sizing: border-box;
-}
+
 .section {
     background-color: #ffffff;
     border-radius: 10px;
@@ -52,10 +59,12 @@ body {
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
 .section h3 {
     color: #003366;
     margin-top: 0;
 }
+
 .hospital-image {
     display: block; /* To prevent inline default spacing */
     width: 100%; /* This will make the image responsive */
@@ -63,17 +72,20 @@ body {
     border-radius: 10px; /* For the sleek card look */
     box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* To match the sections */
 }
+
+/* Adjusted footer to be relative */
 .footer {
     background-color: #003366;
     color: white;
     text-align: center;
     padding: 10px;
-    position: fixed;
-    bottom: 0;
     width: 100%;
     display: flex;
     justify-content: space-evenly;
+    position: relative; /* Changed from fixed to relative */
+    bottom: auto; /* Removed fixed positioning */
 }
+
 .footer a:link, .footer a:visited {
     color: white;
 }
@@ -84,16 +96,19 @@ body {
     border-collapse: collapse;
     margin-top: 1em;
 }
+
 .section.frequencies td {
     padding: 0.5em;
     border: 1px solid #ddd; /* Light gray border for each cell */
 }
+
 /* Styles for highlighting the row */
 .highlight td {
     background-color: #ffff99; /* Light yellow background for highlight */
     font-weight: bold;
 }
 
+/* Styles for the EMS entries and data */
 .ems-entry {
     background-color: #f9f9f9; /* Light background for each entry */
     border: 1px solid #ddd; /* Light border */
@@ -115,6 +130,7 @@ body {
     color: #003366; /* Dark blue for text */
 }
 
+/* Styles for the Code of Ethics list */
 .ems-ethics {
     list-style: none;
     padding: 0;
@@ -147,49 +163,20 @@ body {
     margin-bottom: 5px;
 }
 
-.content {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-}
-
-.codes-column {
-  flex: 1;
-  max-width: 50%;
-  padding: 10px;
-  box-sizing: border-box;
-}
-
-.ems-codes-list {
-  list-style: none;
-  padding-left: 0;
-}
-
-.ems-codes-list li {
-  background-color: #f4f4f4;
-  border-left: 4px solid #5d88a7;
-  margin-bottom: 8px;
-  padding: 8px;
-  font-size: 0.95em;
-}
-
-.code {
-  font-weight: bold;
-  margin-right: 10px;
-}
-
 /* Responsive design adjustments */
 @media (max-width: 768px) {
-  .codes-column {
-    max-width: 100%;
-  }
-}
+    .codes-column {
+        max-width: 100%;
+    }
 
-/* Responsive design */
-@media (min-width: 768px) {
-    .left-column, .right-column {
-        width: 50%; /* Adjust to 50% width on wider screens */
+    .content {
+        margin-bottom: 20px; /* Smaller bottom margin for smaller screens */
     }
 }
 
-/* Add further media queries as needed for larger screens */
+/* Further media queries for larger screens */
+@media (min-width: 768px) {
+    .left-column, .right-column {
+        width: 50%; /* Side by side on larger screens */
+    }
+}
