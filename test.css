@@ -1,0 +1,221 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+.header {
+    background-color: #003366; /* Header background color */
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-logo {
+    width: 6em;
+    height: auto;
+    margin-right: 10px;
+}
+
+.header-menu {
+    display: flex;
+    background-color: #003366; /* Matching the header for a consistent look */
+    padding: 0;
+    margin-left: 10px;
+    border-radius: 5px;
+}
+
+.header-menu a {
+    color: white;
+    text-decoration: none;
+    padding: 5px 8px; /* Reduced padding for smaller link size */
+    font-size: 0.75em; /* Smaller font size to accommodate more links */
+    display: block;
+    transition: background-color 0.3s;
+}
+
+.header-menu a:not(:last-child) {
+    border-right: 1px solid #5d88a7; /* Lighter border for separation */
+}
+
+.header-menu a:hover {
+    background-color: #004d80; /* Slightly darker blue for hover effect */
+}
+
+.title-container {
+    margin-left: 10px;
+    text-align: left;
+}
+.title {
+    font-size: 28px; /* Increased font size for emphasis */
+    font-weight: bold;
+    color: #5d88a7; /* A darker shade for more emphasis */
+    margin-bottom: 0.5em; /* Added some spacing below the title */
+}
+.mission-statement {
+    font-size: 16px; /* Adjusted for better hierarchy */
+}
+.content {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    overflow: auto;
+    scroll-behavior: smooth;
+    justify-content: space-around;
+}
+
+
+.left-column {
+    width: 100%; /* Full width on smaller screens */
+    padding: 20px;
+    box-sizing: border-box;
+}
+.right-column {
+    width: 100%; /* Full width on smaller screens */
+    padding: 20px;
+    box-sizing: border-box;
+}
+.section {
+    background-color: #ffffff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.section h3 {
+    color: #003366;
+    margin-top: 0;
+}
+.hospital-image {
+    display: block; /* To prevent inline default spacing */
+    width: 100%; /* This will make the image responsive */
+    height: auto;
+    border-radius: 10px; /* For the sleek card look */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* To match the sections */
+}
+.footer {
+    background-color: #003366;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}
+.footer a:link, .footer a:visited {
+    color: white;
+}
+
+/* Styles for the frequencies table */
+.section.frequencies table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+}
+.section.frequencies td {
+    padding: 0.5em;
+    border: 1px solid #ddd; /* Light gray border for each cell */
+}
+/* Styles for highlighting the row */
+.highlight td {
+    background-color: #ffff99; /* Light yellow background for highlight */
+    font-weight: bold;
+}
+
+.ems-entry {
+    background-color: #f9f9f9; /* Light background for each entry */
+    border: 1px solid #ddd; /* Light border */
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.ems-entry:nth-child(odd) {
+    background-color: #f1f1f1; /* Slightly darker background for alternate entries */
+}
+
+.ems-data {
+    display: inline-block;
+    margin-right: 15px;
+    color: #003366; /* Dark blue for text */
+}
+
+.ems-ethics {
+    list-style: none;
+    padding: 0;
+}
+
+.ems-ethics li {
+    background-color: #f9f9f9;
+    border-left: 4px solid #003366;
+    margin-bottom: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    font-size: 0.95em;
+}
+
+.ems-ethics li::before {
+    content: '•';
+    color: #003366; /* The color of the bullet! */
+    font-size: 1.5em; /* Size of the bullet */
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.ems-ethics li strong {
+    color: #003366;
+    display: block; /* Makes the title stand on its own line */
+    margin-bottom: 5px;
+}
+
+
+.codes-column {
+  flex: 1;
+  max-width: 50%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.ems-codes-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.ems-codes-list li {
+  background-color: #f4f4f4;
+  border-left: 4px solid #5d88a7;
+  margin-bottom: 8px;
+  padding: 8px;
+  font-size: 0.95em;
+}
+
+.code {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+  .codes-column {
+    max-width: 100%;
+  }
+}
+
+/* Responsive design */
+@media (min-width: 768px) {
+    .left-column, .right-column {
+        width: 50%; /* Adjust to 50% width on wider screens */
+    }
+}
+
+/* Add further media queries as needed for larger screens */
