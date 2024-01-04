@@ -65,6 +65,24 @@ body {
     justify-content: space-around;
 }
 
+.form-controls {
+    display: flex;
+    flex-direction: row; /* Align elements horizontally */
+    flex-wrap: wrap; /* Allow wrapping if space is needed */
+    justify-content: center; /* Center the elements horizontally */
+    gap: 10px; /* Spacing between form items */
+}
+
+/* Override to ensure the form controls do not take full width and allow wrapping */
+.form-controls > * {
+    flex: 0 0 auto;
+}
+
+/* Make sure the procedureSteps div appears on a new line */
+#procedureSteps {
+    width: 100%; /* Full width of its container */
+    clear: both; /* Clear any floated elements */
+}
 
 .left-column {
     width: 100%; /* Full width on smaller screens */
@@ -202,6 +220,30 @@ body {
 .code {
   font-weight: bold;
   margin-right: 10px;
+}
+
+/* Style for the dropdowns */
+select {
+    padding: 10px 15px;
+    font-size: 1rem; /* Larger font size for readability */
+    border: 2px solid #003366; /* Dark blue border */
+    border-radius: 5px; /* Rounded borders for a sleek look */
+    margin-right: 10px; /* Spacing between elements */
+    background-color: #f8f8f8; /* Light grey background */
+    color: #003366; /* Dark blue text */
+    cursor: pointer; /* Changes cursor to indicate it's selectable */
+}
+
+/* Style for the button */
+button {
+    padding: 10px 20px;
+    font-size: 1rem; /* Larger font size for visibility */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded borders */
+    background-color: #007bff; /* A blue that stands out */
+    color: white; /* Text color */
+    cursor: pointer; /* Changes cursor to indicate it's clickable */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
 
 /* Responsive design adjustments */

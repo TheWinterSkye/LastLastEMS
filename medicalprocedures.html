@@ -31,25 +31,30 @@
 </div>
 
 <div class="content">
-    <iframe src="https://docs.google.com/spreadsheets/d/1-JBJH4NS6k_abSUvnySMeRdlZ73mw4vevInw3u8v-LA/edit#gid=153672624" style="width:100%; height:80vh;" frameborder="0"></iframe>
+    <!-- Form controls container -->
+    <div class="form-controls">
+        <select id="department" aria-label="Department">
+            <option value="Operating Room">Operating Room</option>
+            <option value="Transportation">Transportation</option>
+        </select>
 
-      </div>
-      
-      <div class="section frequencies">
-        <h3>Radio Frequencies</h3>
-        <table>
-          <tr><td>1 Hz</td><td>PD Patrol Main</td></tr>
-          <tr><td>2 Hz</td><td>Pursuit 1</td></tr>
-          <tr><td>3 Hz</td><td>Pursuit 2</td></tr>
-          <tr><td>4 Hz</td><td>Training / Other</td></tr>
-          <tr><td>5 Hz</td><td>Other</td></tr>
-          <tr class="highlight"><td>7 Hz</td><td>EMS Main</td></tr>
-          <tr><td>10 Hz</td><td>DOJ Main</td></tr>
-          <tr><td>11 Hz</td><td>Tow Main</td></tr>
-        </table>
-      </div>
+        <select id="severity" aria-label="Severity">
+            <option value="Mild">Mild</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Severe">Severe</option>
+        </select>
+
+        <select id="injuryCode" aria-label="Injury Code">
+            <option value="Drowning (10-22)">Drowning (10-22)</option>
+        </select>
+
+        <button onclick="findProcedure()">Find Procedure</button>
     </div>
-  </div>
+<br>
+    <!-- Procedure steps will be displayed here -->
+    <div id="procedureSteps"></div>
+</div>
 
+<script src="script2.js"></script>
 </body>
 </html>
