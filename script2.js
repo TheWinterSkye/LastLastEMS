@@ -18,13 +18,14 @@ async function findProcedure() {
 }
 
 function parseCSV(data) {
-    const lines = data.split('\n');
-    const headers = lines[0].split(',');
+    const lines = data.split('\n').filter(line => line.trim() !== ''); // Skip empty lines
+    const headers = lines[0].split(',').map(header => header.trim()); // Ensure headers are trimmed
     return lines.slice(1).map(line => {
         const values = line.split(',');
         const record = {};
         headers.forEach((header, index) => {
-            record[header.trim()] = values[index].trim();
+            const value = values[index];
+            record[header] = value ? value.trim() : ''; // Only trim if value is not undefined
         });
         return record;
     });
