@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tear-Off Tabs with Popup Example</title>
+<style>
+    #tabContainer {
+      display: flex;
+      flex-direction: column;
+      width: 200px;
+      padding: 10px;
+      background: #f0f0f0;
+    }
+
+    .tab {
+      margin: 5px;
+      padding: 10px;
+      background: #ddd;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.5s, opacity 0.5s;
+    }
+
+    .tearOffEffect {
+      transform: translateX(100px) translateY(-50px);
+      opacity: 0;
+    }
+</style>
+</head>
+<body>
+
+<div id="tabContainer">
+  <div class="tab" data-url="http://example.com/1">Tab 1</div>
+  <div class="tab" data-url="http://example.com/2">Tab 2</div>
+  <div class="tab" data-url="http://example.com/3">Tab 3</div>
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    const tabElement = this;
+    const url = this.getAttribute('data-url');
+
+    // Apply the animation class
+    tabElement.classList.add('tearOffEffect');
+
+    // Open the new window and keep a reference to it
+    const newWindow = window.open(url, '_blank', 'width=800,height=600');
+
+    setTimeout(() => {
+      // Check periodically if the new window has been closed
+      const checkWindowClosed = setInterval(() => {
+        if (newWindow.closed) {
+          clearInterval(checkWindowClosed);
+
+          // Reset the tab's state by removing the 'tearOffEffect' class
+          tabElement.classList.remove('tearOffEffect');
+
+          // Optionally, you can re-enable the tab or apply other styles here
+        }
+      }, 100); // Check every 100ms
+    }, 500); // Match the duration of the CSS animation
+  });
+});
+</script>
+
+</body>
+</html>
