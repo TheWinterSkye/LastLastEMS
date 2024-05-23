@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ice Power Calculator</title>
+    <link rel="stylesheet" href="icepowerstyles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>GURPS Ice Power Calculator</h1>
+        <form id="icePowerForm">
+            <label for="calculationType">Calculation Type:</label>
+            <select id="calculationType" name="calculationType" onchange="toggleCalculationType()">
+                <option value="wall">Wall</option>
+                <option value="aoe">AOE</option>
+            </select>
+
+            <div id="wallInputs">
+                <label for="createLevel">Create Power Level:</label>
+                <input type="number" id="createLevel" name="createLevel" required>
+                
+                <label for="maintainPoints">Character Points for Maintenance:</label>
+                <input type="number" id="maintainPoints" name="maintainPoints" required>
+                
+                <label for="wallLength">Wall Length (yards):</label>
+                <input type="number" id="wallLength" name="wallLength" required>
+                
+                <label for="wallHeight">Wall Height (yards):</label>
+                <input type="number" id="wallHeight" name="wallHeight" required>
+                
+                <label for="wallThickness">Wall Thickness (yards):</label>
+                <input type="number" id="wallThickness" name="wallThickness" required>
+            </div>
+
+            <div id="aoeInputs" style="display: none;">
+                <label for="createLevelAoe">Create Power Level:</label>
+                <input type="number" id="createLevelAoe" name="createLevelAoe">
+                
+                <label for="maintainPointsAoe">Character Points for Maintenance:</label>
+                <input type="number" id="maintainPointsAoe" name="maintainPointsAoe">
+                
+                <label for="radius">Radius (yards):</label>
+                <input type="number" id="radius" name="radius">
+            </div>
+            
+            <button type="submit">Calculate</button>
+        </form>
+        
+        <div id="result">
+            <h2>Result:</h2>
+            <p id="iceAmountPerMinute"></p>
+            <p id="maintainedIce"></p>
+            <p id="iceStability"></p>
+            <p id="drValue"></p>
+            <p id="hpValue"></p>
+            <div id="iceGenerationDetails"></div>
+        </div>
+    </div>
+    <script src="icepowerscripts.js"></script>
+</body>
+</html>
