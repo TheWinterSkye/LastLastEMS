@@ -14,6 +14,7 @@
             --card-bg: #ffffff;
             --danger: #e74c3c;
             --success: #2ecc71;
+            --gold: #f1c40f;
         }
 
         body {
@@ -36,7 +37,7 @@
         .full-width { grid-column: 1 / -1; }
 
         /* --- INPUT STYLING --- */
-        input[type="text"], textarea {
+        input[type="text"], textarea, input[type="number"] {
             background: rgba(255, 255, 255, 0.5);
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -47,7 +48,7 @@
             box-sizing: border-box;
             transition: 0.2s;
         }
-        input[type="text"]:focus, textarea:focus {
+        input[type="text"]:focus, textarea:focus, input[type="number"]:focus {
             background: white;
             border-color: var(--primary);
             outline: none;
@@ -64,6 +65,7 @@
         }
         .clean-input:focus { background: white; padding: 4px; }
 
+        /* Header Inputs */
         .header-input {
             background: transparent;
             border: none;
@@ -74,6 +76,25 @@
         .header-input::placeholder { color: rgba(255,255,255,0.7); }
         .h1-input { font-size: 2.5rem; font-weight: bold; margin-bottom: 5px; }
         .h2-input { font-size: 1.2rem; font-style: italic; font-weight: 300; }
+        .desc-input { 
+            font-size: 0.95rem; margin-bottom: 10px; resize: vertical; 
+            background: rgba(0,0,0,0.1); border-radius: 4px; padding: 5px;
+        }
+
+        /* Fate Point Counter */
+        .fp-container {
+            display: flex; flex-direction: column; align-items: center; 
+            background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;
+            min-width: 80px; margin-left: 15px;
+        }
+        .fp-input {
+            font-size: 2rem; font-weight: bold; text-align: center; color: white;
+            background: transparent; border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50%; width: 60px; height: 60px; padding: 0;
+            margin-bottom: 5px; -moz-appearance: textfield;
+        }
+        .fp-input::-webkit-outer-spin-button, .fp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .fp-label { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
 
         /* Controls */
         .controls-area {
@@ -101,11 +122,12 @@
         .btn-secondary { background-color: #95a5a6; color: white; }
         .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-        /* Header */
+        /* Header Card */
         .header-card {
             background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white; padding: 25px; border-radius: 12px;
             box-shadow: 0 4px 15px rgba(90, 185, 234, 0.3);
+            display: flex; justify-content: space-between; align-items: flex-start;
         }
 
         /* Image */
@@ -192,6 +214,8 @@
         @media (max-width: 700px) {
             .container { grid-template-columns: 1fr; }
             .char-img-container { height: 250px; }
+            .header-card { flex-direction: column; }
+            .fp-container { margin-left: 0; margin-top: 15px; width: 100%; flex-direction: row; justify-content: center; gap: 10px;}
         }
     </style>
 </head>
@@ -307,8 +331,19 @@
 
     <div>
         <div class="header-card">
-            <input type="text" id="charName" class="header-input h1-input" placeholder="Character Name">
-            <input type="text" id="charConcept" class="header-input h2-input" placeholder="High Concept (e.g. Knight of the Cross)">
+            <div style="flex-grow: 1;">
+                <input type="text" id="charName" class="header-input h1-input" placeholder="Character Name">
+                
+                <textarea id="charDesc" class="header-input desc-input" placeholder="Character description, pronouns, or background..." rows="2"></textarea>
+                
+                <input type="text" id="charConcept" class="header-input h2-input" placeholder="High Concept (e.g. Knight of the Cross)">
+            </div>
+            
+            <div class="fp-container">
+                <input type="number" id="fatePoints" value="3" class="fp-input">
+                <div class="fp-label">Fate Pts</div>
+                <button class="mini-btn" onclick="sendFateUpdate()" title="Spend/Earn Fate Point" style="color: white; margin-top:5px;">🪙</button>
+            </div>
         </div>
 
         <div class="card" style="margin-top: 20px;">
@@ -429,9 +464,16 @@
     // --- SAVE / LOAD SYSTEM ---
     function saveCharacter() {
         const data = {
-            meta: { name: document.getElementById('charName').value, img: document.getElementById('imageUrlInput').value },
+            meta: { 
+                name: document.getElementById('charName').value, 
+                img: document.getElementById('imageUrlInput').value,
+                fatePoints: document.getElementById('fatePoints').value // Saved
+            },
             webhook: document.getElementById('webhookUrl').value,
-            header: { concept: document.getElementById('charConcept').value },
+            header: { 
+                concept: document.getElementById('charConcept').value,
+                desc: document.getElementById('charDesc').value // Saved
+            },
             aspects: {
                 trouble: document.getElementById('aspect-trouble').value,
                 others: Array.from(document.querySelectorAll('.generic-aspect')).map(el => el.value)
@@ -492,9 +534,11 @@
                 const data = JSON.parse(e.target.result);
                 document.getElementById('charName').value = data.meta.name || "";
                 document.getElementById('imageUrlInput').value = data.meta.img || "";
+                document.getElementById('fatePoints').value = data.meta.fatePoints || "3"; // Loaded
                 updateImage();
                 document.getElementById('webhookUrl').value = data.webhook || "";
                 document.getElementById('charConcept').value = data.header.concept || "";
+                document.getElementById('charDesc').value = data.header.desc || ""; // Loaded
                 
                 document.getElementById('aspect-trouble').value = data.aspects.trouble || "";
                 const aspInputs = document.querySelectorAll('.generic-aspect');
@@ -582,6 +626,15 @@
         }
     }
 
+    function sendFateUpdate() {
+        const fp = document.getElementById('fatePoints').value;
+        sendToDiscord({
+            title: "🪙 Fate Points Updated",
+            description: `Current Fate Points: **${fp}**`,
+            color: 15844367
+        });
+    }
+
     function sendPowerStatus() {
         const pName = document.getElementById('powerName').value;
         const boxes = document.querySelectorAll('#powerTrack .active').length;
@@ -607,6 +660,9 @@
     function sendFullSheet() {
         const name = document.getElementById('charName').value || "Unknown";
         const concept = document.getElementById('charConcept').value || "No Concept";
+        const desc = document.getElementById('charDesc').value;
+        const fp = document.getElementById('fatePoints').value;
+
         const pName = document.getElementById('powerName').value;
         const pStress = document.querySelectorAll('#powerTrack .active').length + "/" + document.getElementById('powerTrack').getAttribute('data-count');
         const hStress = document.querySelectorAll('#track1 .active').length + "/" + document.getElementById('track1').getAttribute('data-count');
@@ -616,7 +672,7 @@
 
         sendToDiscord({
             title: name,
-            description: `*${concept}*`,
+            description: `*${concept}*\n\n${desc}\n\n🪙 **Fate Points:** ${fp}`,
             color: 5945834,
             fields: [
                 { name: `⚡ ${pName}`, value: `Stress: ${pStress}`, inline: true },
