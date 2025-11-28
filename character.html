@@ -29,7 +29,7 @@
             max-width: 950px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 340px 1fr;
             gap: 20px;
         }
 
@@ -60,8 +60,9 @@
             font-weight: bold;
             font-size: 1.1em;
             color: var(--text);
+            padding: 0;
         }
-        .clean-input:focus { background: white; }
+        .clean-input:focus { background: white; padding: 4px; }
 
         .header-input {
             background: transparent;
@@ -105,7 +106,6 @@
             background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white; padding: 25px; border-radius: 12px;
             box-shadow: 0 4px 15px rgba(90, 185, 234, 0.3);
-            position: relative; overflow: hidden;
         }
 
         /* Image */
@@ -135,42 +135,31 @@
         }
         .mini-btn:hover { opacity: 1; transform: scale(1.1); }
 
-        /* SKILLS */
-        .skill-tier {
-            display: flex; align-items: flex-start; margin-bottom: 8px; padding-bottom: 8px;
-            border-bottom: 1px dashed #eee;
+        /* POWER SECTION STYLES */
+        .power-card { border: 2px solid var(--secondary); }
+        .power-guide {
+            font-size: 0.85em; background: #fafafa; padding: 10px; border-radius: 6px;
+            border-left: 3px solid var(--secondary); margin-top: 15px;
         }
-        .skill-val {
-            font-weight: 900; color: var(--accent); width: 40px; font-size: 1.1em; flex-shrink: 0; padding-top: 5px;
+        .power-guide input.tier-header {
+            font-weight: bold; color: var(--secondary); margin-top: 5px; border:none; background: transparent;
         }
-        .skill-container {
-            display: flex; flex-wrap: wrap; gap: 6px; width: 100%;
+        .power-guide textarea {
+            font-size: 0.95em; min-height: 50px; resize: vertical; margin-bottom: 5px;
         }
-        .skill-chip-wrapper {
-            position: relative;
-            width: 110px;
+        .condition-row {
+            display: flex; gap: 5px; margin-bottom: 5px; align-items: center;
         }
-        .skill-input {
-            background: #f8fbfe; border: 1px solid #daeaf5; border-radius: 4px;
-            padding: 4px 10px; font-size: 0.9em; text-align: center;
-            width: 100%;
-        }
-        .skill-input:hover { border-color: var(--primary); }
-        .skill-btn {
-            position: absolute; right: 2px; top: 2px; font-size: 0.7em; cursor: pointer; opacity: 0;
-        }
-        .skill-chip-wrapper:hover .skill-btn { opacity: 1; }
+        .condition-row input[type="checkbox"] { width: 20px; height: 20px; }
 
-        /* STRESS & TRACKS */
+        /* STRESS TRACKS */
         .track-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         .track-controls { display: flex; gap: 2px; }
         .track-btn {
             width: 20px; height: 20px; font-size: 12px; padding: 0; border-radius: 3px;
             border: 1px solid #ccc; background: #eee; cursor: pointer;
         }
-
         .stress-track { display: flex; gap: 5px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
-        
         .stress-box {
             width: 30px; height: 30px; border: 2px solid #ccc; border-radius: 4px;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -178,24 +167,27 @@
         }
         .stress-box:hover { border-color: var(--danger); }
         .stress-box.active { background-color: var(--danger); border-color: var(--danger); color: white; }
+        .power-box { border-color: var(--secondary); }
+        .power-box.active { background-color: var(--secondary); border-color: var(--secondary); color: white; }
+
+        /* SKILLS */
+        .skill-tier { display: flex; align-items: flex-start; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #eee; }
+        .skill-val { font-weight: 900; color: var(--accent); width: 40px; font-size: 1.1em; flex-shrink: 0; padding-top: 5px; }
+        .skill-container { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+        .skill-chip-wrapper { position: relative; width: 110px; }
+        .skill-input {
+            background: #f8fbfe; border: 1px solid #daeaf5; border-radius: 4px;
+            padding: 4px 10px; font-size: 0.9em; text-align: center; width: 100%;
+        }
+        .skill-input:hover { border-color: var(--primary); }
 
         /* STUNTS */
-        .stunt-container { margin-bottom: 15px; }
         .stunt-card {
             border-left: 3px solid var(--secondary); padding-left: 10px; margin-bottom: 10px;
-            position: relative;
-            background: #fafafa; padding: 10px; border-radius: 0 4px 4px 0;
+            position: relative; background: #fafafa; padding: 10px; border-radius: 0 4px 4px 0;
         }
-        .stunt-card:hover .delete-stunt { opacity: 1; }
-        .delete-stunt {
-            position: absolute; top: 5px; right: 5px; color: var(--danger); 
-            cursor: pointer; opacity: 0; font-weight: bold;
-        }
-        .stunt-top { display: flex; gap: 10px; margin-bottom: 5px; }
-
-        /* ASPECTS */
-        .aspect-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; }
-        .aspect-label { width: 100px; font-weight: bold; font-size: 0.9em; color: #666; flex-shrink: 0; }
+        .delete-stunt { position: absolute; top: 5px; right: 5px; color: var(--danger); cursor: pointer; opacity: 0.5; font-weight: bold; }
+        .delete-stunt:hover { opacity: 1; }
 
         @media (max-width: 700px) {
             .container { grid-template-columns: 1fr; }
@@ -230,48 +222,85 @@
             <input type="text" id="imageUrlInput" placeholder="Paste Image URL..." oninput="updateImage()">
         </div>
 
-        <div class="card" style="margin-top: 20px;">
-            <h3>Health & Stress <button class="mini-btn" onclick="sendStressStatus()" title="Send Status">✈️</button></h3>
+        <div class="card power-card" style="margin-top: 20px;">
+            <h3>
+                <input type="text" id="powerName" class="clean-input" value="Primary Power" style="width: 70%; color: var(--secondary);">
+                <button class="mini-btn" onclick="sendPowerStatus()" title="Send Power Status">⚡</button>
+            </h3>
             
-            <div class="track-wrapper">
-                <div class="track-header">
-                    <input type="text" class="clean-input" value="Physical" style="width: auto;" id="label-track-1">
-                    <div class="track-controls">
-                        <button class="track-btn" onclick="adjustTrack('track1', -1)">-</button>
-                        <button class="track-btn" onclick="adjustTrack('track1', 1)">+</button>
+            <div class="track-header">
+                <small>Power Stress</small>
+                <div class="track-controls">
+                    <button class="track-btn" onclick="adjustTrack('powerTrack', -1)">-</button>
+                    <button class="track-btn" onclick="adjustTrack('powerTrack', 1)">+</button>
+                </div>
+            </div>
+            <div class="stress-track" id="powerTrack" data-count="3">
+                </div>
+
+            <div class="condition-list">
+                <div class="condition-row">
+                    <input type="checkbox" id="pcond1-chk">
+                    <div style="width: 100%;">
+                        <input type="text" id="pcond1-name" placeholder="Condition 1 (e.g. Winded)" style="font-weight: bold; margin-bottom: 2px;">
+                        <input type="text" id="pcond1-desc" placeholder="Effect (e.g. -2 actions)" style="font-size: 0.8em; color: #666;">
                     </div>
                 </div>
-                <div class="stress-track" id="track1" data-count="3">
-                    </div>
-            </div>
-
-            <div class="track-wrapper">
-                <div class="track-header">
-                    <input type="text" class="clean-input" value="Mental" style="width: auto;" id="label-track-2">
-                    <div class="track-controls">
-                        <button class="track-btn" onclick="adjustTrack('track2', -1)">-</button>
-                        <button class="track-btn" onclick="adjustTrack('track2', 1)">+</button>
+                <div class="condition-row">
+                    <input type="checkbox" id="pcond2-chk">
+                    <div style="width: 100%;">
+                        <input type="text" id="pcond2-name" placeholder="Condition 2 (e.g. Burned Out)" style="font-weight: bold; margin-bottom: 2px;">
+                        <input type="text" id="pcond2-desc" placeholder="Effect (e.g. Power Offline)" style="font-size: 0.8em; color: #666;">
                     </div>
                 </div>
-                <div class="stress-track" id="track2" data-count="3">
-                    </div>
-            </div>
-
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-
-            <div class="track-wrapper">
-                <div class="track-header">
-                    <input type="text" class="clean-input" value="Extra/Power" style="width: auto; color: var(--secondary);" id="label-track-3">
-                    <div class="track-controls">
-                        <button class="track-btn" onclick="adjustTrack('track3', -1)">-</button>
-                        <button class="track-btn" onclick="adjustTrack('track3', 1)">+</button>
+                <div class="condition-row">
+                    <input type="checkbox" id="pcond3-chk">
+                    <div style="width: 100%;">
+                        <input type="text" id="pcond3-name" placeholder="Condition 3 (e.g. Scarred)" style="font-weight: bold; margin-bottom: 2px;">
+                        <input type="text" id="pcond3-desc" placeholder="Effect (e.g. Permanent change)" style="font-size: 0.8em; color: #666;">
                     </div>
                 </div>
-                <div class="stress-track" id="track3" data-count="0">
-                    </div>
             </div>
 
-            <h4 style="margin: 10px 0 5px; font-size:0.9em; color:#666;">Consequences / Conditions</h4>
+            <div class="power-guide">
+                <strong>⚡ Manual: Cost per Effect</strong>
+                
+                <input type="text" id="tier1-head" class="tier-header" value="Tier 1 (1 Box)">
+                <textarea id="tier1-text" placeholder="- Effect 1&#10;- Effect 2"></textarea>
+
+                <input type="text" id="tier2-head" class="tier-header" value="Tier 2 (2 Boxes)">
+                <textarea id="tier2-text" placeholder="- Effect 1&#10;- Effect 2"></textarea>
+
+                <input type="text" id="tier3-head" class="tier-header" value="Tier 3 (3 Boxes)">
+                <textarea id="tier3-text" placeholder="- Effect 1&#10;- Effect 2"></textarea>
+
+                <input type="text" id="limit-head" class="tier-header" value="🚫 Limits" style="color: var(--danger);">
+                <textarea id="limit-text" placeholder="Weaknesses or constraints..."></textarea>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Health & Stress <button class="mini-btn" onclick="sendStressStatus()" title="Send Health">🚑</button></h3>
+            
+            <div class="track-header">
+                <span>Physical</span>
+                <div class="track-controls">
+                    <button class="track-btn" onclick="adjustTrack('track1', -1)">-</button>
+                    <button class="track-btn" onclick="adjustTrack('track1', 1)">+</button>
+                </div>
+            </div>
+            <div class="stress-track" id="track1" data-count="3"></div>
+
+            <div class="track-header">
+                <span>Mental</span>
+                <div class="track-controls">
+                    <button class="track-btn" onclick="adjustTrack('track2', -1)">-</button>
+                    <button class="track-btn" onclick="adjustTrack('track2', 1)">+</button>
+                </div>
+            </div>
+            <div class="stress-track" id="track2" data-count="3"></div>
+
+            <h4 style="margin: 10px 0 5px; font-size:0.9em; color:#666;">Active Complications</h4>
             <textarea id="consequences" rows="3" placeholder="Mild: ...&#10;Moderate: ..."></textarea>
         </div>
     </div>
@@ -283,73 +312,63 @@
         </div>
 
         <div class="card" style="margin-top: 20px;">
-            <h3>Aspects <button class="mini-btn" onclick="sendAspects()" title="Send Aspects">✈️</button></h3>
+            <h3>Aspects <button class="mini-btn" onclick="sendAspects()" title="Send Aspects">📜</button></h3>
             <div id="aspects-list">
-                <div class="aspect-row">
-                    <span class="aspect-label">High Concept</span>
-                    <input type="text" id="aspect-hc" placeholder="Defined in header..." disabled style="background: #eee;">
-                </div>
-                <div class="aspect-row">
-                    <span class="aspect-label">Trouble</span>
-                    <input type="text" id="aspect-trouble" placeholder="Trouble Aspect">
-                </div>
-                <div class="aspect-row">
-                    <input type="text" class="aspect-label clean-input" value="Aspect 3">
-                    <input type="text" class="generic-aspect" placeholder="Aspect description">
-                </div>
-                <div class="aspect-row">
-                    <input type="text" class="aspect-label clean-input" value="Aspect 4">
-                    <input type="text" class="generic-aspect" placeholder="Aspect description">
-                </div>
-                <div class="aspect-row">
-                    <input type="text" class="aspect-label clean-input" value="Aspect 5">
-                    <input type="text" class="generic-aspect" placeholder="Aspect description">
-                </div>
+                <input type="text" id="aspect-trouble" placeholder="Trouble Aspect" style="margin-bottom: 8px;">
+                <input type="text" class="generic-aspect" placeholder="Aspect 3" style="margin-bottom: 8px;">
+                <input type="text" class="generic-aspect" placeholder="Aspect 4" style="margin-bottom: 8px;">
+                <input type="text" class="generic-aspect" placeholder="Aspect 5" style="margin-bottom: 8px;">
             </div>
         </div>
 
         <div class="card">
-            <h3>Skills <button class="mini-btn" onclick="sendSkills()" title="Send Skills">✈️</button></h3>
-            <p style="font-size:0.8em; color:#666;">Type skill name in box. Click box to roll.</p>
-
+            <h3>Skills <button class="mini-btn" onclick="sendSkills()" title="Send Skills">📊</button></h3>
             <div id="skills-area">
-                <div class="skill-tier">
-                    <span class="skill-val">+4</span>
+                <div class="skill-tier"><span class="skill-val">+4</span>
                     <div class="skill-container">
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 4)"></div>
                     </div>
                 </div>
-                <div class="skill-tier">
-                    <span class="skill-val">+3</span>
+                <div class="skill-tier"><span class="skill-val">+3</span>
                     <div class="skill-container">
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 3)"></div>
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 3)"></div>
                     </div>
                 </div>
-                <div class="skill-tier">
-                    <span class="skill-val">+2</span>
+                <div class="skill-tier"><span class="skill-val">+2</span>
                     <div class="skill-container">
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 2)"></div>
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 2)"></div>
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 2)"></div>
                     </div>
                 </div>
-                <div class="skill-tier">
-                    <span class="skill-val">+1</span>
+                <div class="skill-tier"><span class="skill-val">+1</span>
                     <div class="skill-container">
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 1)"></div>
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 1)"></div>
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 1)"></div>
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 1)"></div>
+                    </div>
+                </div>
+                <div class="skill-tier" style="border-bottom:none;">
+                    <span class="skill-val" style="color:#999;">+0</span>
+                    <div class="skill-container">
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <h3>Stunts & Extras <button class="mini-btn" onclick="sendStunts()" title="Send Stunts">✈️</button></h3>
-            <div id="stunts-list">
-                </div>
+            <h3>Stunts <button class="mini-btn" onclick="sendStunts()" title="Send Stunts">⚡</button></h3>
+            <div id="stunts-list"></div>
             <button class="btn btn-primary" style="margin-top:10px; width:100%; justify-content:center;" onclick="addStunt()">+ Add Stunt</button>
         </div>
     </div>
@@ -358,51 +377,38 @@
 <script>
     // --- INITIALIZATION ---
     window.onload = function() {
-        // Initialize tracks
+        renderStress('powerTrack', 'power-box');
         renderStress('track1');
         renderStress('track2');
-        renderStress('track3');
-        
-        // Add one empty stunt if none
-        if(document.getElementById('stunts-list').children.length === 0) {
-            addStunt();
-        }
-
-        // Sync Header to Aspect 1
-        document.getElementById('charConcept').addEventListener('input', function() {
-            document.getElementById('aspect-hc').value = this.value;
-        });
+        if(document.getElementById('stunts-list').children.length === 0) { addStunt(); }
     }
 
-    // --- IMAGE HANDLING ---
+    // --- LOGIC ---
     function updateImage() {
         const url = document.getElementById('imageUrlInput').value;
         if(url) document.getElementById('charImage').src = url;
     }
 
-    // --- STRESS TRACK LOGIC ---
     function adjustTrack(trackId, change) {
         const track = document.getElementById(trackId);
         let count = parseInt(track.getAttribute('data-count')) || 0;
-        count += change;
-        if (count < 0) count = 0;
-        if (count > 10) count = 10; // safety limit
+        count = Math.max(0, Math.min(10, count + change));
         track.setAttribute('data-count', count);
-        renderStress(trackId);
+        renderStress(trackId, trackId === 'powerTrack' ? 'power-box' : 'stress-box');
     }
 
-    function renderStress(trackId) {
+    function renderStress(trackId, boxClass = 'stress-box') {
         const track = document.getElementById(trackId);
         const count = parseInt(track.getAttribute('data-count'));
-        
-        // Preserve checked state if possible, though expanding/shrinking resets specific indices
-        // Ideally we map by index. Simple approach: regenerate.
         const currentActive = Array.from(track.children).map(c => c.classList.contains('active'));
         
         track.innerHTML = '';
         for(let i=1; i<=count; i++) {
             const box = document.createElement('div');
-            box.className = 'stress-box';
+            box.className = `${boxClass}`;
+            if(boxClass === 'stress-box') box.classList.add('stress-box');
+            if(boxClass === 'power-box') box.classList.add('stress-box', 'power-box');
+
             box.innerText = i;
             if(currentActive[i-1]) box.classList.add('active');
             box.onclick = function() { this.classList.toggle('active'); };
@@ -410,16 +416,13 @@
         }
     }
 
-    // --- STUNT LOGIC ---
     function addStunt(name="", desc="") {
         const list = document.getElementById('stunts-list');
         const div = document.createElement('div');
         div.className = 'stunt-card';
         div.innerHTML = `
             <span class="delete-stunt" onclick="this.parentElement.remove()">×</span>
-            <div class="stunt-top">
-                <input type="text" class="stunt-name-input" placeholder="Stunt Name" value="${name}" style="font-weight:bold;">
-            </div>
+            <input type="text" class="stunt-name-input" placeholder="Stunt Name" value="${name}" style="font-weight:bold; margin-bottom:5px;">
             <textarea class="stunt-desc-input" placeholder="Effect/Description" rows="2">${desc}</textarea>
         `;
         list.appendChild(div);
@@ -429,251 +432,215 @@
     function saveCharacter() {
         const data = {
             meta: { name: document.getElementById('charName').value, img: document.getElementById('imageUrlInput').value },
-            header: {
-                concept: document.getElementById('charConcept').value,
-            },
+            webhook: document.getElementById('webhookUrl').value,
+            header: { concept: document.getElementById('charConcept').value },
             aspects: {
                 trouble: document.getElementById('aspect-trouble').value,
-                others: Array.from(document.querySelectorAll('.generic-aspect')).map((el, index) => ({
-                    label: document.querySelectorAll('.aspect-label')[index+2].value, // +2 because first 2 are fixed
-                    val: el.value
-                }))
+                others: Array.from(document.querySelectorAll('.generic-aspect')).map(el => el.value)
             },
-            stress: ['track1', 'track2', 'track3'].map(id => {
-                const tr = document.getElementById(id);
-                return {
-                    id: id,
-                    label: document.getElementById('label-'+id).value,
-                    count: tr.getAttribute('data-count'),
-                    active: Array.from(tr.children).map(c => c.classList.contains('active'))
-                };
-            }),
+            health: ['track1', 'track2'].map(id => ({
+                id: id, count: document.getElementById(id).getAttribute('data-count'),
+                active: Array.from(document.getElementById(id).children).map(c => c.classList.contains('active'))
+            })),
             consequences: document.getElementById('consequences').value,
-            skills: Array.from(document.querySelectorAll('.skill-tier')).map(tier => {
-                return {
-                    bonus: tier.querySelector('.skill-val').innerText,
-                    skills: Array.from(tier.querySelectorAll('.skill-input')).map(i => i.value)
-                };
-            }),
+            
+            // POWER DATA
+            power: {
+                name: document.getElementById('powerName').value,
+                track: {
+                    count: document.getElementById('powerTrack').getAttribute('data-count'),
+                    active: Array.from(document.getElementById('powerTrack').children).map(c => c.classList.contains('active'))
+                },
+                conditions: [1,2,3].map(i => ({
+                    checked: document.getElementById(`pcond${i}-chk`).checked,
+                    name: document.getElementById(`pcond${i}-name`).value,
+                    desc: document.getElementById(`pcond${i}-desc`).value
+                })),
+                manual: {
+                    t1h: document.getElementById('tier1-head').value, t1t: document.getElementById('tier1-text').value,
+                    t2h: document.getElementById('tier2-head').value, t2t: document.getElementById('tier2-text').value,
+                    t3h: document.getElementById('tier3-head').value, t3t: document.getElementById('tier3-text').value,
+                    lh: document.getElementById('limit-head').value, lt: document.getElementById('limit-text').value
+                }
+            },
+            skills: Array.from(document.querySelectorAll('.skill-tier')).map(tier => ({
+                bonus: tier.querySelector('.skill-val').innerText,
+                skills: Array.from(tier.querySelectorAll('.skill-input')).map(i => i.value)
+            })),
             stunts: Array.from(document.querySelectorAll('.stunt-card')).map(card => ({
                 name: card.querySelector('.stunt-name-input').value,
                 desc: card.querySelector('.stunt-desc-input').value
-            })),
-            webhook: document.getElementById('webhookUrl').value
+            }))
         };
-
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+        
+        // FIX FOR SAVE BUTTON: Create element, append, click, remove
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = (data.meta.name || "character") + ".json";
+        document.body.appendChild(a); // Required for Firefox
         a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     function loadCharacter(input) {
         const file = input.files[0];
         if(!file) return;
-        
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
                 const data = JSON.parse(e.target.result);
-                
-                // Meta
                 document.getElementById('charName').value = data.meta.name || "";
                 document.getElementById('imageUrlInput').value = data.meta.img || "";
                 updateImage();
                 document.getElementById('webhookUrl').value = data.webhook || "";
-
-                // Header
                 document.getElementById('charConcept').value = data.header.concept || "";
-                document.getElementById('aspect-hc').value = data.header.concept || "";
-
-                // Aspects
+                
                 document.getElementById('aspect-trouble').value = data.aspects.trouble || "";
-                const genericInputs = document.querySelectorAll('.generic-aspect');
-                const genericLabels = document.querySelectorAll('.aspect-label');
-                if(data.aspects.others) {
-                    data.aspects.others.forEach((asp, i) => {
-                        if(genericInputs[i]) genericInputs[i].value = asp.val;
-                        if(genericLabels[i+2]) genericLabels[i+2].value = asp.label;
-                    });
-                }
+                const aspInputs = document.querySelectorAll('.generic-aspect');
+                data.aspects.others.forEach((v, i) => { if(aspInputs[i]) aspInputs[i].value = v; });
 
-                // Stress
-                data.stress.forEach(s => {
-                    const el = document.getElementById(s.id);
-                    if(el) {
-                        el.setAttribute('data-count', s.count);
-                        document.getElementById('label-'+s.id).value = s.label;
-                        renderStress(s.id);
-                        // Restore active boxes
-                        Array.from(el.children).forEach((box, i) => {
-                            if(s.active[i]) box.classList.add('active');
-                        });
-                    }
+                data.health.forEach(h => {
+                    const el = document.getElementById(h.id);
+                    el.setAttribute('data-count', h.count);
+                    renderStress(h.id);
+                    Array.from(el.children).forEach((box, i) => { if(h.active[i]) box.classList.add('active'); });
                 });
                 document.getElementById('consequences').value = data.consequences || "";
 
-                // Skills
-                // Note: This relies on the HTML structure matching. 
-                // A more robust system would generate the HTML grid from JSON, but this works for fixed grid.
+                // Load Power
+                if(data.power) {
+                    document.getElementById('powerName').value = data.power.name || "";
+                    const pt = document.getElementById('powerTrack');
+                    pt.setAttribute('data-count', data.power.track.count);
+                    renderStress('powerTrack', 'power-box');
+                    Array.from(pt.children).forEach((box, i) => { if(data.power.track.active[i]) box.classList.add('active'); });
+
+                    data.power.conditions.forEach((c, i) => {
+                        const idx = i+1;
+                        document.getElementById(`pcond${idx}-chk`).checked = c.checked;
+                        document.getElementById(`pcond${idx}-name`).value = c.name;
+                        document.getElementById(`pcond${idx}-desc`).value = c.desc;
+                    });
+                    document.getElementById('tier1-head').value = data.power.manual.t1h; document.getElementById('tier1-text').value = data.power.manual.t1t;
+                    document.getElementById('tier2-head').value = data.power.manual.t2h; document.getElementById('tier2-text').value = data.power.manual.t2t;
+                    document.getElementById('tier3-head').value = data.power.manual.t3h; document.getElementById('tier3-text').value = data.power.manual.t3t;
+                    document.getElementById('limit-head').value = data.power.manual.lh; document.getElementById('limit-text').value = data.power.manual.lt;
+                }
+
+                // Load Skills (Including the new +0 tier)
                 const tiers = document.querySelectorAll('.skill-tier');
                 data.skills.forEach((dTier, i) => {
                     if(tiers[i]) {
                         const inputs = tiers[i].querySelectorAll('.skill-input');
-                        dTier.skills.forEach((sVal, k) => {
-                            if(inputs[k]) inputs[k].value = sVal;
-                        });
+                        dTier.skills.forEach((sVal, k) => { if(inputs[k]) inputs[k].value = sVal; });
                     }
                 });
 
-                // Stunts
                 document.getElementById('stunts-list').innerHTML = "";
                 data.stunts.forEach(s => addStunt(s.name, s.desc));
-
-                alert("Character Loaded Successfully!");
-            } catch(err) {
-                console.error(err);
-                alert("Error loading file. Check console.");
-            }
+            } catch(err) { console.error(err); alert("Error loading file."); }
         };
         reader.readAsText(file);
     }
 
-    // --- DISCORD WEBHOOK ---
+    // --- DISCORD SENDERS ---
     async function sendToDiscord(embedData) {
-        const webhookUrl = document.getElementById('webhookUrl').value;
-        if (!webhookUrl) { alert("Please enter a Webhook URL first!"); return; }
-        
-        const name = document.getElementById('charName').value || "Unknown Character";
-        const img = document.getElementById('imageUrlInput').value;
-
-        const payload = {
-            username: name,
-            avatar_url: img,
-            embeds: [embedData]
-        };
-
-        try {
-            await fetch(webhookUrl, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-        } catch (e) { console.error(e); alert("Failed to send to Discord."); }
+        const url = document.getElementById('webhookUrl').value;
+        if (!url) { alert("Missing Webhook URL"); return; }
+        const payload = { username: document.getElementById('charName').value, avatar_url: document.getElementById('imageUrlInput').value, embeds: [embedData] };
+        try { await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); } catch (e) { console.error(e); }
     }
 
-    // --- DATA GATHERERS FOR DISCORD ---
+    function sendPowerStatus() {
+        const pName = document.getElementById('powerName').value;
+        const boxes = document.querySelectorAll('#powerTrack .active').length;
+        const total = document.getElementById('powerTrack').getAttribute('data-count');
+        
+        let status = "";
+        [1,2,3].forEach(i => {
+            const chk = document.getElementById(`pcond${i}-chk`).checked ? "✅" : "⬜";
+            const name = document.getElementById(`pcond${i}-name`).value;
+            if(name) status += `${chk} **${name}**\n`;
+        });
+
+        const t1 = document.getElementById('tier1-text').value ? `\n**${document.getElementById('tier1-head').value}**` : "";
+        const t3 = document.getElementById('tier3-text').value ? `\n(Highest Tier Available)` : "";
+
+        sendToDiscord({
+            title: `⚡ ${pName} Status`,
+            color: 8937680,
+            description: `**Stress:** ${boxes} / ${total}\n\n**Conditions:**\n${status || "None"}`
+        });
+    }
+
     function sendFullSheet() {
         const name = document.getElementById('charName').value;
         const concept = document.getElementById('charConcept').value;
-        const trouble = document.getElementById('aspect-trouble').value;
+        const pName = document.getElementById('powerName').value;
+        const pStress = document.querySelectorAll('#powerTrack .active').length + "/" + document.getElementById('powerTrack').getAttribute('data-count');
+        const hStress = document.querySelectorAll('#track1 .active').length + "/" + document.getElementById('track1').getAttribute('data-count');
+        const mStress = document.querySelectorAll('#track2 .active').length + "/" + document.getElementById('track2').getAttribute('data-count');
         
-        // Stress Summary
-        let stressText = "";
-        ['track1','track2','track3'].forEach(id => {
-            const tr = document.getElementById(id);
-            const label = document.getElementById('label-'+id).value;
-            const filled = tr.querySelectorAll('.active').length;
-            const total = tr.getAttribute('data-count');
-            if(total > 0) stressText += `**${label}:** ${filled}/${total}\n`;
-        });
-        const cons = document.getElementById('consequences').value;
-
-        // Skills (Only top ones)
-        const inputs = Array.from(document.querySelectorAll('.skill-input')).filter(i => i.value.trim() !== "");
-        const skillTxt = inputs.slice(0, 10).map(i => i.value).join(", ") + (inputs.length > 10 ? "..." : "");
+        const skillList = Array.from(document.querySelectorAll('.skill-input')).filter(i => i.value).slice(0, 10).map(i => i.value).join(", ");
 
         sendToDiscord({
-            title: name + " - Full Sheet",
-            color: 5945834,
+            title: name,
             description: `*${concept}*`,
-            thumbnail: { url: document.getElementById('imageUrlInput').value },
+            color: 5945834,
             fields: [
-                { name: "📜 Aspects", value: `**Trouble:** ${trouble}`, inline: false },
-                { name: "🚑 Status", value: stressText + "\n**Cond:** " + (cons || "None"), inline: true },
-                { name: "📊 Key Skills", value: skillTxt || "None listed", inline: false }
-            ]
+                { name: `⚡ ${pName}`, value: `Stress: ${pStress}`, inline: true },
+                { name: "🚑 Health", value: `Phys: ${hStress}\nMen: ${mStress}`, inline: true },
+                { name: "📊 Skills", value: skillList || "None", inline: false }
+            ],
+            thumbnail: { url: document.getElementById('imageUrlInput').value }
         });
     }
 
     function sendAspects() {
-        let txt = `**High Concept:** ${document.getElementById('charConcept').value}\n`;
-        txt += `**Trouble:** ${document.getElementById('aspect-trouble').value}\n`;
-        
-        const genericInputs = document.querySelectorAll('.generic-aspect');
-        const genericLabels = document.querySelectorAll('.aspect-label');
-        genericInputs.forEach((inp, i) => {
-            if(inp.value) txt += `**${genericLabels[i+2].value}:** ${inp.value}\n`;
-        });
-
+        let txt = `**High Concept:** ${document.getElementById('charConcept').value}\n**Trouble:** ${document.getElementById('aspect-trouble').value}\n`;
+        document.querySelectorAll('.generic-aspect').forEach(i => { if(i.value) txt += `• ${i.value}\n`; });
         sendToDiscord({ title: "📜 Aspects", description: txt, color: 15105570 });
     }
-
+    
     function sendSkills() {
         let txt = "";
-        const tiers = document.querySelectorAll('.skill-tier');
-        tiers.forEach(tier => {
-            const bonus = tier.querySelector('.skill-val').innerText;
-            const skills = Array.from(tier.querySelectorAll('.skill-input'))
-                .map(i => i.value).filter(v => v);
-            if(skills.length > 0) {
-                txt += `**${bonus}**: ${skills.join(", ")}\n`;
-            }
+        document.querySelectorAll('.skill-tier').forEach(t => {
+            const b = t.querySelector('.skill-val').innerText;
+            const s = Array.from(t.querySelectorAll('.skill-input')).map(i=>i.value).filter(v=>v).join(", ");
+            if(s) txt += `**${b}**: ${s}\n`;
         });
-        sendToDiscord({ title: "📊 Skills", description: txt || "No skills defined.", color: 3447003 });
+        sendToDiscord({ title: "📊 Skills", description: txt, color: 3447003 });
     }
 
     function sendStunts() {
         let txt = "";
-        document.querySelectorAll('.stunt-card').forEach(card => {
-            const n = card.querySelector('.stunt-name-input').value;
-            const d = card.querySelector('.stunt-desc-input').value;
-            if(n) txt += `**${n}**\n${d}\n\n`;
+        document.querySelectorAll('.stunt-card').forEach(c => {
+            if(c.querySelector('.stunt-name-input').value) 
+                txt += `**${c.querySelector('.stunt-name-input').value}**\n${c.querySelector('.stunt-desc-input').value}\n\n`;
         });
-        sendToDiscord({ title: "⚡ Stunts", description: txt || "No stunts listed.", color: 10181046 });
+        sendToDiscord({ title: "⚡ Stunts", description: txt, color: 10181046 });
     }
 
     function sendStressStatus() {
-        let txt = "";
-        ['track1','track2','track3'].forEach(id => {
-            const tr = document.getElementById(id);
-            const label = document.getElementById('label-'+id).value;
-            const count = tr.getAttribute('data-count');
-            if(count > 0) {
-                // visualize
-                const boxes = Array.from(tr.children).map(b => b.classList.contains('active') ? "❌" : "⬜").join(" ");
-                txt += `**${label}:** ${boxes}\n`;
-            }
-        });
-        txt += `\n**Conditions:**\n${document.getElementById('consequences').value || "None"}`;
-        sendToDiscord({ title: "🚑 Status Report", description: txt, color: 15548997 });
+        const p = document.querySelectorAll('#track1 .active').length + "/" + document.getElementById('track1').getAttribute('data-count');
+        const m = document.querySelectorAll('#track2 .active').length + "/" + document.getElementById('track2').getAttribute('data-count');
+        const c = document.getElementById('consequences').value;
+        sendToDiscord({ title: "🚑 Health Status", description: `**Physical:** ${p}\n**Mental:** ${m}\n\n**Complications:**\n${c}`, color: 15548997 });
     }
 
     function rollSkill(input, bonus) {
-        if(input === event.target && input.value === "") return; // Don't roll empty on click-through
-        const skillName = input.value || "Unnamed Skill";
-        
-        let total = 0;
-        let symbols = "";
+        if(input === event.target && !input.value) return;
+        const skill = input.value || "Skill";
+        let total = 0, symbols = "";
         for(let i=0; i<4; i++) {
-            let r = Math.floor(Math.random() * 3) - 1; 
-            total += r;
-            symbols += (r === -1) ? "➖" : (r === 0) ? "⬜" : "➕";
+            let r = Math.floor(Math.random()*3)-1;
+            total += r; symbols += (r===-1?"➖":(r===0?"⬜":"➕"));
         }
-        let final = total + bonus;
-        
-        let ladder = {
-            "-2": "Terrible", "-1": "Poor", "0": "Mediocre", "1": "Average", 
-            "2": "Fair", "3": "Good", "4": "Great", "5": "Superb", 
-            "6": "Fantastic", "7": "Epic", "8": "Legendary"
-        };
-        let adj = ladder[final] || (final > 8 ? "Godlike" : "Abysmal");
-
-        const desc = `**Skill:** ${skillName} (+${bonus})\n**Dice:** ${symbols} (${total > 0 ? '+' : ''}${total})\n**Result:** **${final}** (${adj})`;
-        sendToDiscord({ title: `🎲 Rolling ${skillName}`, description: desc, color: 5945834 });
+        sendToDiscord({ title: `🎲 ${skill} (+${bonus})`, description: `**Dice:** ${symbols} (${total>0?'+':''}${total})\n**Result:** **${total+bonus}**`, color: 5945834 });
     }
 </script>
-
 </body>
 </html>
