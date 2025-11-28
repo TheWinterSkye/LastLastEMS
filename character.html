@@ -208,7 +208,7 @@
 
         <div style="flex-grow: 1; margin: 0 20px; display: flex; gap: 10px; align-items: center;">
             <span>🔗 Webhook:</span>
-            <input type="text" id="webhookUrl" placeholder="Paste Discord Webhook URL here..." style="flex-grow:1;">
+            <input type="text" id="webhookUrl" value="https://discord.com/api/webhooks/1209724299964059648/GuMJ84RoseRXp1sopGezGBsYRSmI2zEdcsI2jM00Af6GHfVmpE91gKWe7g53gLIvFt1G" style="flex-grow:1;">
         </div>
         
         <button class="btn btn-success" onclick="sendFullSheet()">📤 Send Sheet</button>
@@ -350,11 +350,9 @@
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 1)"></div>
                     </div>
                 </div>
-                <div class="skill-tier" style="border-bottom:none;">
+                 <div class="skill-tier" style="border-bottom:none;">
                     <span class="skill-val" style="color:#999;">+0</span>
                     <div class="skill-container">
-                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
-                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
                         <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 0)"></div>
@@ -474,12 +472,12 @@
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
         
-        // FIX FOR SAVE BUTTON: Create element, append, click, remove
+        // FIX FOR SAVE BUTTON
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = (data.meta.name || "character") + ".json";
-        document.body.appendChild(a); // Required for Firefox
+        document.body.appendChild(a); 
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
@@ -530,7 +528,7 @@
                     document.getElementById('limit-head').value = data.power.manual.lh; document.getElementById('limit-text').value = data.power.manual.lt;
                 }
 
-                // Load Skills (Including the new +0 tier)
+                // Load Skills
                 const tiers = document.querySelectorAll('.skill-tier');
                 data.skills.forEach((dTier, i) => {
                     if(tiers[i]) {
@@ -548,10 +546,40 @@
 
     // --- DISCORD SENDERS ---
     async function sendToDiscord(embedData) {
-        const url = document.getElementById('webhookUrl').value;
-        if (!url) { alert("Missing Webhook URL"); return; }
-        const payload = { username: document.getElementById('charName').value, avatar_url: document.getElementById('imageUrlInput').value, embeds: [embedData] };
-        try { await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); } catch (e) { console.error(e); }
+        const webhookUrl = document.getElementById('webhookUrl').value;
+        if (!webhookUrl) { alert("Please enter a Webhook URL first!"); return; }
+
+        const charName = document.getElementById('charName').value || "Fate Character";
+        const imgUrl = document.getElementById('imageUrlInput').value;
+
+        // Construct Payload
+        const payload = {
+            username: charName,
+            embeds: [embedData]
+        };
+        
+        // Safety: Only add avatar if it isn't empty, otherwise Discord rejects it
+        if (imgUrl && imgUrl.trim() !== "") {
+            payload.avatar_url = imgUrl;
+        }
+
+        try {
+            const response = await fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                alert("Discord Error: " + response.status + " " + response.statusText + "\n" + errText);
+            } else {
+                console.log("Sent successfully.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Network Error: If you are running this file locally on your PC, Discord might be blocking the connection (CORS).");
+        }
     }
 
     function sendPowerStatus() {
@@ -577,8 +605,8 @@
     }
 
     function sendFullSheet() {
-        const name = document.getElementById('charName').value;
-        const concept = document.getElementById('charConcept').value;
+        const name = document.getElementById('charName').value || "Unknown";
+        const concept = document.getElementById('charConcept').value || "No Concept";
         const pName = document.getElementById('powerName').value;
         const pStress = document.querySelectorAll('#powerTrack .active').length + "/" + document.getElementById('powerTrack').getAttribute('data-count');
         const hStress = document.querySelectorAll('#track1 .active').length + "/" + document.getElementById('track1').getAttribute('data-count');
