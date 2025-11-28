@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maurice "Mo" Vance - Character Sheet</title>
+    <style>
+        :root {
+            --primary: #5AB9EA; /* Sky Blue */
+            --secondary: #8860D0; /* Deep Purple for Power */
+            --accent: #5680E9;
+            --bg: #f4f8fb;
+            --text: #2c3e50;
+            --card-bg: #ffffff;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --chip-hover: #e1f0fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+        }
+
+        .full-width { grid-column: 1 / -1; }
+
+        /* Controls */
+        .controls-area {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .webhook-group {
+            flex-grow: 1;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .webhook-group input {
+            flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; color: #666;
+        }
+
+        .big-send-btn {
+            background-color: var(--success); color: white; border: none; padding: 10px 20px;
+            border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .big-send-btn:hover { background-color: #27ae60; transform: translateY(-2px); }
+
+        /* Header */
+        .header-card {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; padding: 25px; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(90, 185, 234, 0.3);
+            position: relative; overflow: hidden;
+        }
+        .header-card::after {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: rgba(255,255,255,0.1); transform: rotate(30deg); animation: wind 6s linear infinite;
+        }
+        @keyframes wind {
+            0% { transform: rotate(30deg) translateY(0); }
+            100% { transform: rotate(30deg) translateY(50px); }
+        }
+        .header-card h1 { margin: 0; font-size: 2.5rem; z-index: 2; position: relative;}
+        .header-card h2 { margin: 5px 0 0; font-weight: 300; font-style: italic; z-index: 2; position: relative;}
+
+        /* Image */
+        .image-card {
+            background: white; padding: 10px; border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center;
+        }
+        .char-img-container {
+            width: 100%; height: 300px; background-color: #ddd; border-radius: 8px;
+            overflow: hidden; margin-bottom: 10px; border: 4px solid white;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        .char-img { width: 100%; height: 100%; object-fit: cover; }
+        .img-input { width: 90%; padding: 5px; font-size: 0.8em; border: 1px solid #eee; border-radius: 4px; }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg); border-radius: 10px; padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; margin-bottom: 20px;
+        }
+
+        h3 {
+            border-bottom: 2px solid var(--primary); padding-bottom: 5px; margin-top: 0;
+            color: var(--secondary); display: flex; justify-content: space-between; align-items: center;
+        }
+        .mini-btn {
+            background: none; border: none; cursor: pointer; font-size: 1.2rem; opacity: 0.5; transition: 0.2s;
+        }
+        .mini-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        /* SKILLS GRID & CHIPS */
+        .skill-tier {
+            display: flex; align-items: baseline; margin-bottom: 8px; padding-bottom: 8px;
+            border-bottom: 1px dashed #eee;
+        }
+        .skill-val {
+            font-weight: 900; color: var(--accent); width: 40px; font-size: 1.1em; flex-shrink: 0;
+        }
+        .skill-container {
+            display: flex; flex-wrap: wrap; gap: 6px;
+        }
+        .skill-chip {
+            background: #f8fbfe; border: 1px solid #daeaf5; border-radius: 4px;
+            padding: 4px 10px; font-size: 0.9em; cursor: pointer; color: #444;
+            transition: all 0.2s; user-select: none;
+        }
+        .skill-chip:hover {
+            background: var(--primary); color: white; border-color: var(--primary);
+            transform: translateY(-1px); box-shadow: 0 2px 4px rgba(90, 185, 234, 0.3);
+        }
+        .skill-chip:active { transform: translateY(0); }
+
+        /* Power & Stunts */
+        .stress-track { display: flex; gap: 5px; margin-bottom: 15px; align-items: center; }
+        .stress-label { width: 70px; font-weight: bold; font-size: 0.9em; }
+        
+        .stress-box {
+            width: 30px; height: 30px; border: 2px solid #ccc; border-radius: 4px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #ccc; user-select: none; transition: 0.2s;
+        }
+        .stress-box:hover { border-color: var(--danger); }
+        .stress-box.active { background-color: var(--danger); border-color: var(--danger); color: white; }
+
+        .power-box { border-color: var(--secondary); }
+        .power-box:hover { border-color: #6a4c9c; }
+        .power-box.active { background-color: var(--secondary); border-color: var(--secondary); color: white; }
+
+        .condition-list label {
+            display: block; margin-bottom: 8px; cursor: pointer; padding: 5px;
+            border-radius: 4px; transition: 0.2s;
+        }
+        .condition-list label:hover { background: #f0f0f0; }
+        .condition-desc { font-size: 0.8em; color: #666; margin-left: 25px; display: block;}
+
+        textarea.complications-box {
+            width: 100%; height: 60px; border: 1px solid #ccc; border-radius: 4px;
+            padding: 8px; font-family: inherit; resize: vertical; box-sizing: border-box;
+        }
+
+        /* Power Manual */
+        .power-guide {
+            font-size: 0.85em; background: #fafafa; padding: 10px; border-radius: 6px;
+            border-left: 3px solid var(--secondary); margin-top: 15px;
+        }
+        .power-guide h4 { margin: 10px 0 5px 0; color: var(--secondary); }
+        .power-guide ul { padding-left: 20px; margin: 0; }
+        .power-guide li { margin-bottom: 4px; color: #444; }
+        .limit-text { color: var(--danger); font-weight: bold; }
+
+        /* Power Stunts */
+        .stunt-card {
+            border-left: 3px solid var(--secondary); padding-left: 10px; margin-bottom: 15px;
+        }
+        .stunt-name { font-weight: bold; color: var(--text); display: block; }
+        .stunt-cost {
+            font-size: 0.75em; text-transform: uppercase; background: var(--secondary);
+            color: white; padding: 2px 6px; border-radius: 3px; margin-left: 5px; vertical-align: middle;
+        }
+        .stunt-desc { font-size: 0.9em; color: #555; display: block; margin-top: 2px; }
+
+        @media (max-width: 700px) {
+            .container { grid-template-columns: 1fr; }
+            .char-img-container { height: 250px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="full-width controls-area">
+        <div class="webhook-group">
+            <span>🔗 Webhook:</span>
+            <input type="text" id="webhookUrl" value="https://discord.com/api/webhooks/1209724299964059648/GuMJ84RoseRXp1sopGezGBsYRSmI2zEdcsI2jM00Af6GHfVmpE91gKWe7g53gLIvFt1G">
+        </div>
+        <button class="big-send-btn" onclick="sendFullSheet()">
+            📤 Send Full Sheet
+        </button>
+    </div>
+
+    <div>
+        <div class="image-card">
+            <div class="char-img-container">
+                <img id="charImage" src="https://placehold.co/400x600/5AB9EA/white?text=Maurice" alt="Character Portrait" class="char-img">
+            </div>
+            <input type="text" id="imageUrlInput" class="img-input" placeholder="Paste Image URL here..." oninput="updateImage()">
+        </div>
+
+        <div class="card" style="margin-top: 20px; border: 2px solid var(--secondary);">
+            <h3 style="color: var(--secondary);">Aerokinesis <button class="mini-btn" onclick="sendPowerStatus()" title="Send Power Status">✈️</button></h3>
+            
+            <div class="stress-track">
+                <span class="stress-label">Power</span>
+                <div class="stress-box power-box" onclick="toggleStress(this)">1</div>
+                <div class="stress-box power-box" onclick="toggleStress(this)">2</div>
+                <div class="stress-box power-box" onclick="toggleStress(this)">3</div>
+            </div>
+
+            <div class="condition-list">
+                <label><input type="checkbox" id="cond-winded"> <strong>Winded</strong>
+                    <span class="condition-desc">-2 power actions.</span></label>
+                <label><input type="checkbox" id="cond-burned"> <strong>Burned Out</strong>
+                    <span class="condition-desc">Power offline.</span></label>
+                <label><input type="checkbox" id="cond-scarred"> <strong>Scarred</strong>
+                    <span class="condition-desc">Permanent change.</span></label>
+            </div>
+
+            <div class="power-guide">
+                <strong>⚡ Manual: Cost per Effect</strong>
+                
+                <h4>Tier 1 (1 Box)</h4>
+                <ul>
+                    <li>Stiff breeze / mess up hair</li>
+                    <li>Cushion fall (moderate height)</li>
+                    <li>Pseudo-speed (sprint boost)</li>
+                    <li>Knock over one person</li>
+                </ul>
+
+                <h4>Tier 2 (2 Boxes)</h4>
+                <ul>
+                    <li>Wind Wall (block hallway)</li>
+                    <li>Group Knockdown (zone)</li>
+                    <li>Super Jump (high altitude)</li>
+                    <li>Suffocation (requires focus)</li>
+                </ul>
+
+                <h4>Tier 3 (3 Boxes)</h4>
+                <ul>
+                    <li>Summon Tornado</li>
+                    <li>Wind Blade (cut car/beam)</li>
+                    <li>Vacuum Room</li>
+                </ul>
+
+                <h4>🚫 Limits</h4>
+                <ul>
+                    <li><span class="limit-text">No True Flight</span> (Glide/Jump only)</li>
+                    <li><span class="limit-text">Needs Air</span> (Fails in vacuum)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Health & Complications <button class="mini-btn" onclick="sendStressStatus()" title="Send Status">✈️</button></h3>
+            
+            <div class="stress-track" id="phys-track">
+                <span class="stress-label">Physical</span>
+                <div class="stress-box" onclick="toggleStress(this)">1</div>
+                <div class="stress-box" onclick="toggleStress(this)">2</div>
+                <div class="stress-box" onclick="toggleStress(this)">3</div>
+                <div class="stress-box" onclick="toggleStress(this)">4</div>
+            </div>
+
+            <div class="stress-track" id="ment-track">
+                <span class="stress-label">Mental</span>
+                <div class="stress-box" onclick="toggleStress(this)">1</div>
+                <div class="stress-box" onclick="toggleStress(this)">2</div>
+                <div class="stress-box" onclick="toggleStress(this)">3</div>
+            </div>
+
+            <h4 style="margin: 10px 0 5px; font-size:0.9em; color:#666;">Active Complications</h4>
+            <textarea id="complications" class="complications-box" placeholder="e.g. Mild: Sprained Ankle"></textarea>
+        </div>
+    </div>
+
+    <div>
+        <div class="header-card">
+            <h1>Maurice "Mo" Vance</h1>
+            <h2>"The Wind Follows My Whim"</h2>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h3>Aspects <button class="mini-btn" onclick="sendAspects()" title="Send to Discord">✈️</button></h3>
+            <ul style="list-style:none; padding:0; margin:0;">
+                <li style="padding:5px 0;"><strong>High Concept:</strong> Free-Spirited Rebel with a Heart of Gold</li>
+                <li style="padding:5px 0;"><strong>Trouble:</strong> Allergic to Authority</li>
+                <li style="padding:5px 0;"><strong>Relationship:</strong> Trying to Prove Dad Wrong</li>
+                <li style="padding:5px 0;"><strong>Power:</strong> The Wind Follows My Whim</li>
+                <li style="padding:5px 0;"><strong>Normal Life:</strong> Permanent Resident of Detention</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>Skills <button class="mini-btn" onclick="sendSkillsList()" title="Send Skill List">✈️</button></h3>
+            <p style="font-size:0.8em; color:#666; margin-bottom:10px;">Click a skill chip to roll.</p>
+
+            <div class="skill-tier">
+                <span class="skill-val">+4</span>
+                <div class="skill-container">
+                    <div class="skill-chip" onclick="rollSkill('Athletics', 4)">Athletics</div>
+                </div>
+            </div>
+
+            <div class="skill-tier">
+                <span class="skill-val">+3</span>
+                <div class="skill-container">
+                    <div class="skill-chip" onclick="rollSkill('Provoke', 3)">Provoke</div>
+                    <div class="skill-chip" onclick="rollSkill('Fight', 3)">Fight</div>
+                </div>
+            </div>
+
+            <div class="skill-tier">
+                <span class="skill-val">+2</span>
+                <div class="skill-container">
+                    <div class="skill-chip" onclick="rollSkill('Investigate', 2)">Investigate</div>
+                    <div class="skill-chip" onclick="rollSkill('Will', 2)">Will</div>
+                    <div class="skill-chip" onclick="rollSkill('Rapport', 2)">Rapport</div>
+                </div>
+            </div>
+
+            <div class="skill-tier">
+                <span class="skill-val">+1</span>
+                <div class="skill-container">
+                    <div class="skill-chip" onclick="rollSkill('Empathy', 1)">Empathy</div>
+                    <div class="skill-chip" onclick="rollSkill('Stealth', 1)">Stealth</div>
+                    <div class="skill-chip" onclick="rollSkill('Lore', 1)">Lore</div>
+                    <div class="skill-chip" onclick="rollSkill('Physique', 1)">Physique</div>
+                </div>
+            </div>
+
+            <div class="skill-tier" style="border-bottom:none;">
+                <span class="skill-val">+0</span>
+                <div class="skill-container">
+                    <div class="skill-chip" onclick="rollSkill('Contacts', 0)">Contacts</div>
+                    <div class="skill-chip" onclick="rollSkill('Burglary', 0)">Burglary</div>
+                    <div class="skill-chip" onclick="rollSkill('Crafts', 0)">Crafts</div>
+                    <div class="skill-chip" onclick="rollSkill('Deceive', 0)">Deceive</div>
+                    <div class="skill-chip" onclick="rollSkill('Drive', 0)">Drive</div>
+                    <div class="skill-chip" onclick="rollSkill('Notice', 0)">Notice</div>
+                    <div class="skill-chip" onclick="rollSkill('Resources', 0)">Resources</div>
+                    <div class="skill-chip" onclick="rollSkill('Shoot', 0)">Shoot</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Stunts <button class="mini-btn" onclick="sendStunts()" title="Send Stunts">✈️</button></h3>
+            
+            <div class="stunt-card" style="border-left-color: #7f8c8d;">
+                <span class="stunt-name">I Didn't Do It</span>
+                <span class="stunt-desc">+2 Rapport vs Authority figures to avoid trouble.</span>
+            </div>
+
+            <div class="stunt-card">
+                <span class="stunt-name">Aero-Kinetic Dodge <span class="stunt-cost">Cost: 1 Stress (Tier 1)</span></span>
+                <span class="stunt-desc">+2 to Athletics to Defend against physical attacks (requires room).</span>
+            </div>
+
+            <div class="stunt-card">
+                <span class="stunt-name">Air Blade <span class="stunt-cost">Cost: 1 or 2 Stress</span></span>
+                <span class="stunt-desc">+2 Fight. Tier 1 to cut handheld objects/weapons. Tier 2 to cut structures/vehicles.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- IMAGE & SETUP ---
+    window.onload = function() {
+        const savedImg = localStorage.getItem('mauriceImg');
+        if(savedImg) {
+            document.getElementById('imageUrlInput').value = savedImg;
+            document.getElementById('charImage').src = savedImg;
+        }
+    }
+    function updateImage() {
+        const url = document.getElementById('imageUrlInput').value;
+        if(url) {
+            document.getElementById('charImage').src = url;
+            localStorage.setItem('mauriceImg', url);
+        }
+    }
+
+    // --- STRESS UI ---
+    function toggleStress(box) { box.classList.toggle('active'); }
+
+    // --- DISCORD LOGIC ---
+    async function sendToDiscord(payload) {
+        const webhookUrl = document.getElementById('webhookUrl').value;
+        if (!webhookUrl) { alert("Webhook URL is missing!"); return; }
+        try {
+            await fetch(webhookUrl, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        } catch (e) { console.error(e); alert("Error sending to Discord."); }
+    }
+
+    // --- FULL SHEET EXPORT ---
+    function sendFullSheet() {
+        const imgUrl = document.getElementById('imageUrlInput').value;
+        const physBoxes = document.querySelectorAll('#phys-track .stress-box.active').length;
+        const mentBoxes = document.querySelectorAll('#ment-track .stress-box.active').length;
+        const powerBoxes = document.querySelectorAll('.power-box.active').length;
+        const complications = document.getElementById('complications').value || "None";
+        
+        const winded = document.getElementById('cond-winded').checked ? "✅ Active" : "⬜";
+        const burned = document.getElementById('cond-burned').checked ? "✅ Active" : "⬜";
+        const scarred = document.getElementById('cond-scarred').checked ? "✅ Active" : "⬜";
+
+        const payload = {
+            username: "Maurice 'Mo' Vance", avatar_url: imgUrl,
+            embeds: [{
+                title: "Maurice 'Mo' Vance - Full Sheet",
+                color: 5945834, thumbnail: { url: imgUrl },
+                fields: [
+                    { name: "🌪️ Power", value: `Stress: ${powerBoxes}/3\nWinded: ${winded}\nBurned: ${burned}\nScarred: ${scarred}`, inline: true },
+                    { name: "🚑 Health", value: `Phys: ${physBoxes}/4\nMent: ${mentBoxes}/3\nComplications: ${complications}`, inline: true },
+                    { name: "📊 Skills", value: "+4 Athletics\n+3 Provoke, Fight\n+2 Investigate, Will, Rapport\n+1 Empathy, Stealth, Lore, Physique\n+0 Contacts, Notice, etc.", inline: false },
+                    { name: "⚡ Power Stunts", value: "**Aero-Dodge:** (1 Stress) +2 Athletics Defend\n**Air Blade:** (1-2 Stress) +2 Fight Cut", inline: false }
+                ]
+            }]
+        };
+        sendToDiscord(payload);
+    }
+
+    // --- HELPER FOR EMBEDS ---
+    function simpleEmbed(title, desc, color) {
+        const imgUrl = document.getElementById('imageUrlInput').value;
+        return {
+            username: "Maurice 'Mo' Vance", avatar_url: imgUrl,
+            embeds: [{ title: title, description: desc, color: color, thumbnail: { url: imgUrl } }]
+        };
+    }
+
+    // --- SECTION SENDERS ---
+    function sendAspects() {
+        sendToDiscord(simpleEmbed("📜 Aspects", "**High Concept:** Free-Spirited Rebel...\n**Trouble:** Allergic to Authority\n**Relationship:** Trying to Prove Dad Wrong\n**Power:** The Wind Follows My Whim\n**Normal:** Resident of Detention", 5945834));
+    }
+    function sendSkillsList() {
+        sendToDiscord(simpleEmbed("📊 Skill List", "**+4** Athletics\n**+3** Provoke, Fight\n**+2** Investigate, Will, Rapport\n**+1** Empathy, Stealth, Lore, Physique\n**+0** Contacts, Burglary, Crafts, Deceive, Drive, Notice, Resources, Shoot", 5945834));
+    }
+    function sendStunts() {
+        sendToDiscord(simpleEmbed("⚡ Stunts", "**I Didn't Do It:** +2 Rapport vs Authority.\n\n**Aero-Kinetic Dodge** (Cost: 1 Stress)\n+2 Athletics Defend.\n\n**Air Blade** (Cost: 1 or 2 Stress)\n+2 Fight Cut.", 5945834));
+    }
+    function sendStressStatus() {
+        const p = document.querySelectorAll('#phys-track .stress-box.active').length;
+        const m = document.querySelectorAll('#ment-track .stress-box.active').length;
+        const c = document.getElementById('complications').value || "None";
+        sendToDiscord(simpleEmbed("🚑 Status Report", `**Physical:** ${p}/4\n**Mental:** ${m}/3\n**Active Complications:**\n${c}`, 15158332));
+    }
+    function sendPowerStatus() {
+        const p = document.querySelectorAll('.power-box.active').length;
+        const w = document.getElementById('cond-winded').checked ? "✅" : "⬜";
+        const b = document.getElementById('cond-burned').checked ? "✅" : "⬜";
+        const s = document.getElementById('cond-scarred').checked ? "✅" : "⬜";
+        sendToDiscord(simpleEmbed("🌪️ Power Status", `**Stress:** ${p}/3\n**Winded:** ${w}\n**Burned Out:** ${b}\n**Scarred:** ${s}`, 8937680));
+    }
+
+    // --- DICE ROLLER ---
+    function rollSkill(skillName, bonus) {
+        let total = 0;
+        let symbols = "";
+        for(let i=0; i<4; i++) {
+            let r = Math.floor(Math.random() * 3) - 1; 
+            total += r;
+            symbols += (r === -1) ? "➖" : (r === 0) ? "⬜" : "➕";
+        }
+        let final = total + bonus;
+        let adj = ["Terrible","Poor","Mediocre","Average","Fair","Good","Great","Superb","Fantastic","Epic","Legendary"][final+2] || (final>8?"Legendary":"Abysmal");
+
+        const desc = `**Skill:** ${skillName} (+${bonus})\n**Dice:** ${symbols} (${total > 0 ? '+' : ''}${total})\n**Result:** **${final}** (${adj})`;
+        sendToDiscord(simpleEmbed(`🎲 Rolling ${skillName}`, desc, 5945834));
+    }
+</script>
+
+</body>
+</html>
