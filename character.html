@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fate Generic Character Sheet</title>
+    <style>
+        :root {
+            --primary: #5AB9EA;
+            --secondary: #8860D0;
+            --accent: #5680E9;
+            --bg: #f4f8fb;
+            --text: #2c3e50;
+            --card-bg: #ffffff;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+        }
+
+        .full-width { grid-column: 1 / -1; }
+
+        /* --- INPUT STYLING --- */
+        input[type="text"], textarea {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-family: inherit;
+            color: inherit;
+            width: 100%;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+        input[type="text"]:focus, textarea:focus {
+            background: white;
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 5px rgba(90, 185, 234, 0.3);
+        }
+        
+        .clean-input {
+            border: none;
+            background: transparent;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: var(--text);
+        }
+        .clean-input:focus { background: white; }
+
+        .header-input {
+            background: transparent;
+            border: none;
+            color: white;
+            text-align: left;
+            width: 100%;
+        }
+        .header-input::placeholder { color: rgba(255,255,255,0.7); }
+        .h1-input { font-size: 2.5rem; font-weight: bold; margin-bottom: 5px; }
+        .h2-input { font-size: 1.2rem; font-style: italic; font-weight: 300; }
+
+        /* Controls */
+        .controls-area {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-controls { display: flex; gap: 10px; }
+        
+        .btn {
+            border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 5px; font-size: 0.9rem;
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-secondary { background-color: #95a5a6; color: white; }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        /* Header */
+        .header-card {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; padding: 25px; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(90, 185, 234, 0.3);
+            position: relative; overflow: hidden;
+        }
+
+        /* Image */
+        .image-card {
+            background: white; padding: 10px; border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center;
+        }
+        .char-img-container {
+            width: 100%; height: 300px; background-color: #ddd; border-radius: 8px;
+            overflow: hidden; margin-bottom: 10px; border: 4px solid white;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        .char-img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg); border-radius: 10px; padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; margin-bottom: 20px;
+        }
+
+        h3 {
+            border-bottom: 2px solid var(--primary); padding-bottom: 5px; margin-top: 0;
+            color: var(--secondary); display: flex; justify-content: space-between; align-items: center;
+        }
+        .mini-btn {
+            background: none; border: none; cursor: pointer; font-size: 1.2rem; opacity: 0.5; transition: 0.2s;
+        }
+        .mini-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        /* SKILLS */
+        .skill-tier {
+            display: flex; align-items: flex-start; margin-bottom: 8px; padding-bottom: 8px;
+            border-bottom: 1px dashed #eee;
+        }
+        .skill-val {
+            font-weight: 900; color: var(--accent); width: 40px; font-size: 1.1em; flex-shrink: 0; padding-top: 5px;
+        }
+        .skill-container {
+            display: flex; flex-wrap: wrap; gap: 6px; width: 100%;
+        }
+        .skill-chip-wrapper {
+            position: relative;
+            width: 110px;
+        }
+        .skill-input {
+            background: #f8fbfe; border: 1px solid #daeaf5; border-radius: 4px;
+            padding: 4px 10px; font-size: 0.9em; text-align: center;
+            width: 100%;
+        }
+        .skill-input:hover { border-color: var(--primary); }
+        .skill-btn {
+            position: absolute; right: 2px; top: 2px; font-size: 0.7em; cursor: pointer; opacity: 0;
+        }
+        .skill-chip-wrapper:hover .skill-btn { opacity: 1; }
+
+        /* STRESS & TRACKS */
+        .track-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .track-controls { display: flex; gap: 2px; }
+        .track-btn {
+            width: 20px; height: 20px; font-size: 12px; padding: 0; border-radius: 3px;
+            border: 1px solid #ccc; background: #eee; cursor: pointer;
+        }
+
+        .stress-track { display: flex; gap: 5px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
+        
+        .stress-box {
+            width: 30px; height: 30px; border: 2px solid #ccc; border-radius: 4px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #ccc; user-select: none; transition: 0.2s; background: white;
+        }
+        .stress-box:hover { border-color: var(--danger); }
+        .stress-box.active { background-color: var(--danger); border-color: var(--danger); color: white; }
+
+        /* STUNTS */
+        .stunt-container { margin-bottom: 15px; }
+        .stunt-card {
+            border-left: 3px solid var(--secondary); padding-left: 10px; margin-bottom: 10px;
+            position: relative;
+            background: #fafafa; padding: 10px; border-radius: 0 4px 4px 0;
+        }
+        .stunt-card:hover .delete-stunt { opacity: 1; }
+        .delete-stunt {
+            position: absolute; top: 5px; right: 5px; color: var(--danger); 
+            cursor: pointer; opacity: 0; font-weight: bold;
+        }
+        .stunt-top { display: flex; gap: 10px; margin-bottom: 5px; }
+
+        /* ASPECTS */
+        .aspect-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; }
+        .aspect-label { width: 100px; font-weight: bold; font-size: 0.9em; color: #666; flex-shrink: 0; }
+
+        @media (max-width: 700px) {
+            .container { grid-template-columns: 1fr; }
+            .char-img-container { height: 250px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="full-width controls-area">
+        <div class="file-controls">
+            <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📂 Load JSON</button>
+            <input type="file" id="fileInput" style="display: none;" onchange="loadCharacter(this)">
+            <button class="btn btn-secondary" onclick="saveCharacter()">💾 Save JSON</button>
+        </div>
+
+        <div style="flex-grow: 1; margin: 0 20px; display: flex; gap: 10px; align-items: center;">
+            <span>🔗 Webhook:</span>
+            <input type="text" id="webhookUrl" placeholder="Paste Discord Webhook URL here..." style="flex-grow:1;">
+        </div>
+        
+        <button class="btn btn-success" onclick="sendFullSheet()">📤 Send Sheet</button>
+    </div>
+
+    <div>
+        <div class="image-card">
+            <div class="char-img-container">
+                <img id="charImage" src="https://placehold.co/400x600/e0e0e0/white?text=No+Image" alt="Character" class="char-img">
+            </div>
+            <input type="text" id="imageUrlInput" placeholder="Paste Image URL..." oninput="updateImage()">
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h3>Health & Stress <button class="mini-btn" onclick="sendStressStatus()" title="Send Status">✈️</button></h3>
+            
+            <div class="track-wrapper">
+                <div class="track-header">
+                    <input type="text" class="clean-input" value="Physical" style="width: auto;" id="label-track-1">
+                    <div class="track-controls">
+                        <button class="track-btn" onclick="adjustTrack('track1', -1)">-</button>
+                        <button class="track-btn" onclick="adjustTrack('track1', 1)">+</button>
+                    </div>
+                </div>
+                <div class="stress-track" id="track1" data-count="3">
+                    </div>
+            </div>
+
+            <div class="track-wrapper">
+                <div class="track-header">
+                    <input type="text" class="clean-input" value="Mental" style="width: auto;" id="label-track-2">
+                    <div class="track-controls">
+                        <button class="track-btn" onclick="adjustTrack('track2', -1)">-</button>
+                        <button class="track-btn" onclick="adjustTrack('track2', 1)">+</button>
+                    </div>
+                </div>
+                <div class="stress-track" id="track2" data-count="3">
+                    </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+            <div class="track-wrapper">
+                <div class="track-header">
+                    <input type="text" class="clean-input" value="Extra/Power" style="width: auto; color: var(--secondary);" id="label-track-3">
+                    <div class="track-controls">
+                        <button class="track-btn" onclick="adjustTrack('track3', -1)">-</button>
+                        <button class="track-btn" onclick="adjustTrack('track3', 1)">+</button>
+                    </div>
+                </div>
+                <div class="stress-track" id="track3" data-count="0">
+                    </div>
+            </div>
+
+            <h4 style="margin: 10px 0 5px; font-size:0.9em; color:#666;">Consequences / Conditions</h4>
+            <textarea id="consequences" rows="3" placeholder="Mild: ...&#10;Moderate: ..."></textarea>
+        </div>
+    </div>
+
+    <div>
+        <div class="header-card">
+            <input type="text" id="charName" class="header-input h1-input" placeholder="Character Name">
+            <input type="text" id="charConcept" class="header-input h2-input" placeholder="High Concept (e.g. Knight of the Cross)">
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h3>Aspects <button class="mini-btn" onclick="sendAspects()" title="Send Aspects">✈️</button></h3>
+            <div id="aspects-list">
+                <div class="aspect-row">
+                    <span class="aspect-label">High Concept</span>
+                    <input type="text" id="aspect-hc" placeholder="Defined in header..." disabled style="background: #eee;">
+                </div>
+                <div class="aspect-row">
+                    <span class="aspect-label">Trouble</span>
+                    <input type="text" id="aspect-trouble" placeholder="Trouble Aspect">
+                </div>
+                <div class="aspect-row">
+                    <input type="text" class="aspect-label clean-input" value="Aspect 3">
+                    <input type="text" class="generic-aspect" placeholder="Aspect description">
+                </div>
+                <div class="aspect-row">
+                    <input type="text" class="aspect-label clean-input" value="Aspect 4">
+                    <input type="text" class="generic-aspect" placeholder="Aspect description">
+                </div>
+                <div class="aspect-row">
+                    <input type="text" class="aspect-label clean-input" value="Aspect 5">
+                    <input type="text" class="generic-aspect" placeholder="Aspect description">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Skills <button class="mini-btn" onclick="sendSkills()" title="Send Skills">✈️</button></h3>
+            <p style="font-size:0.8em; color:#666;">Type skill name in box. Click box to roll.</p>
+
+            <div id="skills-area">
+                <div class="skill-tier">
+                    <span class="skill-val">+4</span>
+                    <div class="skill-container">
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 4)"></div>
+                    </div>
+                </div>
+                <div class="skill-tier">
+                    <span class="skill-val">+3</span>
+                    <div class="skill-container">
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 3)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 3)"></div>
+                    </div>
+                </div>
+                <div class="skill-tier">
+                    <span class="skill-val">+2</span>
+                    <div class="skill-container">
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 2)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 2)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 2)"></div>
+                    </div>
+                </div>
+                <div class="skill-tier">
+                    <span class="skill-val">+1</span>
+                    <div class="skill-container">
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 1)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 1)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 1)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" onclick="rollSkill(this, 1)"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Stunts & Extras <button class="mini-btn" onclick="sendStunts()" title="Send Stunts">✈️</button></h3>
+            <div id="stunts-list">
+                </div>
+            <button class="btn btn-primary" style="margin-top:10px; width:100%; justify-content:center;" onclick="addStunt()">+ Add Stunt</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- INITIALIZATION ---
+    window.onload = function() {
+        // Initialize tracks
+        renderStress('track1');
+        renderStress('track2');
+        renderStress('track3');
+        
+        // Add one empty stunt if none
+        if(document.getElementById('stunts-list').children.length === 0) {
+            addStunt();
+        }
+
+        // Sync Header to Aspect 1
+        document.getElementById('charConcept').addEventListener('input', function() {
+            document.getElementById('aspect-hc').value = this.value;
+        });
+    }
+
+    // --- IMAGE HANDLING ---
+    function updateImage() {
+        const url = document.getElementById('imageUrlInput').value;
+        if(url) document.getElementById('charImage').src = url;
+    }
+
+    // --- STRESS TRACK LOGIC ---
+    function adjustTrack(trackId, change) {
+        const track = document.getElementById(trackId);
+        let count = parseInt(track.getAttribute('data-count')) || 0;
+        count += change;
+        if (count < 0) count = 0;
+        if (count > 10) count = 10; // safety limit
+        track.setAttribute('data-count', count);
+        renderStress(trackId);
+    }
+
+    function renderStress(trackId) {
+        const track = document.getElementById(trackId);
+        const count = parseInt(track.getAttribute('data-count'));
+        
+        // Preserve checked state if possible, though expanding/shrinking resets specific indices
+        // Ideally we map by index. Simple approach: regenerate.
+        const currentActive = Array.from(track.children).map(c => c.classList.contains('active'));
+        
+        track.innerHTML = '';
+        for(let i=1; i<=count; i++) {
+            const box = document.createElement('div');
+            box.className = 'stress-box';
+            box.innerText = i;
+            if(currentActive[i-1]) box.classList.add('active');
+            box.onclick = function() { this.classList.toggle('active'); };
+            track.appendChild(box);
+        }
+    }
+
+    // --- STUNT LOGIC ---
+    function addStunt(name="", desc="") {
+        const list = document.getElementById('stunts-list');
+        const div = document.createElement('div');
+        div.className = 'stunt-card';
+        div.innerHTML = `
+            <span class="delete-stunt" onclick="this.parentElement.remove()">×</span>
+            <div class="stunt-top">
+                <input type="text" class="stunt-name-input" placeholder="Stunt Name" value="${name}" style="font-weight:bold;">
+            </div>
+            <textarea class="stunt-desc-input" placeholder="Effect/Description" rows="2">${desc}</textarea>
+        `;
+        list.appendChild(div);
+    }
+
+    // --- SAVE / LOAD SYSTEM ---
+    function saveCharacter() {
+        const data = {
+            meta: { name: document.getElementById('charName').value, img: document.getElementById('imageUrlInput').value },
+            header: {
+                concept: document.getElementById('charConcept').value,
+            },
+            aspects: {
+                trouble: document.getElementById('aspect-trouble').value,
+                others: Array.from(document.querySelectorAll('.generic-aspect')).map((el, index) => ({
+                    label: document.querySelectorAll('.aspect-label')[index+2].value, // +2 because first 2 are fixed
+                    val: el.value
+                }))
+            },
+            stress: ['track1', 'track2', 'track3'].map(id => {
+                const tr = document.getElementById(id);
+                return {
+                    id: id,
+                    label: document.getElementById('label-'+id).value,
+                    count: tr.getAttribute('data-count'),
+                    active: Array.from(tr.children).map(c => c.classList.contains('active'))
+                };
+            }),
+            consequences: document.getElementById('consequences').value,
+            skills: Array.from(document.querySelectorAll('.skill-tier')).map(tier => {
+                return {
+                    bonus: tier.querySelector('.skill-val').innerText,
+                    skills: Array.from(tier.querySelectorAll('.skill-input')).map(i => i.value)
+                };
+            }),
+            stunts: Array.from(document.querySelectorAll('.stunt-card')).map(card => ({
+                name: card.querySelector('.stunt-name-input').value,
+                desc: card.querySelector('.stunt-desc-input').value
+            })),
+            webhook: document.getElementById('webhookUrl').value
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = (data.meta.name || "character") + ".json";
+        a.click();
+    }
+
+    function loadCharacter(input) {
+        const file = input.files[0];
+        if(!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                // Meta
+                document.getElementById('charName').value = data.meta.name || "";
+                document.getElementById('imageUrlInput').value = data.meta.img || "";
+                updateImage();
+                document.getElementById('webhookUrl').value = data.webhook || "";
+
+                // Header
+                document.getElementById('charConcept').value = data.header.concept || "";
+                document.getElementById('aspect-hc').value = data.header.concept || "";
+
+                // Aspects
+                document.getElementById('aspect-trouble').value = data.aspects.trouble || "";
+                const genericInputs = document.querySelectorAll('.generic-aspect');
+                const genericLabels = document.querySelectorAll('.aspect-label');
+                if(data.aspects.others) {
+                    data.aspects.others.forEach((asp, i) => {
+                        if(genericInputs[i]) genericInputs[i].value = asp.val;
+                        if(genericLabels[i+2]) genericLabels[i+2].value = asp.label;
+                    });
+                }
+
+                // Stress
+                data.stress.forEach(s => {
+                    const el = document.getElementById(s.id);
+                    if(el) {
+                        el.setAttribute('data-count', s.count);
+                        document.getElementById('label-'+s.id).value = s.label;
+                        renderStress(s.id);
+                        // Restore active boxes
+                        Array.from(el.children).forEach((box, i) => {
+                            if(s.active[i]) box.classList.add('active');
+                        });
+                    }
+                });
+                document.getElementById('consequences').value = data.consequences || "";
+
+                // Skills
+                // Note: This relies on the HTML structure matching. 
+                // A more robust system would generate the HTML grid from JSON, but this works for fixed grid.
+                const tiers = document.querySelectorAll('.skill-tier');
+                data.skills.forEach((dTier, i) => {
+                    if(tiers[i]) {
+                        const inputs = tiers[i].querySelectorAll('.skill-input');
+                        dTier.skills.forEach((sVal, k) => {
+                            if(inputs[k]) inputs[k].value = sVal;
+                        });
+                    }
+                });
+
+                // Stunts
+                document.getElementById('stunts-list').innerHTML = "";
+                data.stunts.forEach(s => addStunt(s.name, s.desc));
+
+                alert("Character Loaded Successfully!");
+            } catch(err) {
+                console.error(err);
+                alert("Error loading file. Check console.");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // --- DISCORD WEBHOOK ---
+    async function sendToDiscord(embedData) {
+        const webhookUrl = document.getElementById('webhookUrl').value;
+        if (!webhookUrl) { alert("Please enter a Webhook URL first!"); return; }
+        
+        const name = document.getElementById('charName').value || "Unknown Character";
+        const img = document.getElementById('imageUrlInput').value;
+
+        const payload = {
+            username: name,
+            avatar_url: img,
+            embeds: [embedData]
+        };
+
+        try {
+            await fetch(webhookUrl, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        } catch (e) { console.error(e); alert("Failed to send to Discord."); }
+    }
+
+    // --- DATA GATHERERS FOR DISCORD ---
+    function sendFullSheet() {
+        const name = document.getElementById('charName').value;
+        const concept = document.getElementById('charConcept').value;
+        const trouble = document.getElementById('aspect-trouble').value;
+        
+        // Stress Summary
+        let stressText = "";
+        ['track1','track2','track3'].forEach(id => {
+            const tr = document.getElementById(id);
+            const label = document.getElementById('label-'+id).value;
+            const filled = tr.querySelectorAll('.active').length;
+            const total = tr.getAttribute('data-count');
+            if(total > 0) stressText += `**${label}:** ${filled}/${total}\n`;
+        });
+        const cons = document.getElementById('consequences').value;
+
+        // Skills (Only top ones)
+        const inputs = Array.from(document.querySelectorAll('.skill-input')).filter(i => i.value.trim() !== "");
+        const skillTxt = inputs.slice(0, 10).map(i => i.value).join(", ") + (inputs.length > 10 ? "..." : "");
+
+        sendToDiscord({
+            title: name + " - Full Sheet",
+            color: 5945834,
+            description: `*${concept}*`,
+            thumbnail: { url: document.getElementById('imageUrlInput').value },
+            fields: [
+                { name: "📜 Aspects", value: `**Trouble:** ${trouble}`, inline: false },
+                { name: "🚑 Status", value: stressText + "\n**Cond:** " + (cons || "None"), inline: true },
+                { name: "📊 Key Skills", value: skillTxt || "None listed", inline: false }
+            ]
+        });
+    }
+
+    function sendAspects() {
+        let txt = `**High Concept:** ${document.getElementById('charConcept').value}\n`;
+        txt += `**Trouble:** ${document.getElementById('aspect-trouble').value}\n`;
+        
+        const genericInputs = document.querySelectorAll('.generic-aspect');
+        const genericLabels = document.querySelectorAll('.aspect-label');
+        genericInputs.forEach((inp, i) => {
+            if(inp.value) txt += `**${genericLabels[i+2].value}:** ${inp.value}\n`;
+        });
+
+        sendToDiscord({ title: "📜 Aspects", description: txt, color: 15105570 });
+    }
+
+    function sendSkills() {
+        let txt = "";
+        const tiers = document.querySelectorAll('.skill-tier');
+        tiers.forEach(tier => {
+            const bonus = tier.querySelector('.skill-val').innerText;
+            const skills = Array.from(tier.querySelectorAll('.skill-input'))
+                .map(i => i.value).filter(v => v);
+            if(skills.length > 0) {
+                txt += `**${bonus}**: ${skills.join(", ")}\n`;
+            }
+        });
+        sendToDiscord({ title: "📊 Skills", description: txt || "No skills defined.", color: 3447003 });
+    }
+
+    function sendStunts() {
+        let txt = "";
+        document.querySelectorAll('.stunt-card').forEach(card => {
+            const n = card.querySelector('.stunt-name-input').value;
+            const d = card.querySelector('.stunt-desc-input').value;
+            if(n) txt += `**${n}**\n${d}\n\n`;
+        });
+        sendToDiscord({ title: "⚡ Stunts", description: txt || "No stunts listed.", color: 10181046 });
+    }
+
+    function sendStressStatus() {
+        let txt = "";
+        ['track1','track2','track3'].forEach(id => {
+            const tr = document.getElementById(id);
+            const label = document.getElementById('label-'+id).value;
+            const count = tr.getAttribute('data-count');
+            if(count > 0) {
+                // visualize
+                const boxes = Array.from(tr.children).map(b => b.classList.contains('active') ? "❌" : "⬜").join(" ");
+                txt += `**${label}:** ${boxes}\n`;
+            }
+        });
+        txt += `\n**Conditions:**\n${document.getElementById('consequences').value || "None"}`;
+        sendToDiscord({ title: "🚑 Status Report", description: txt, color: 15548997 });
+    }
+
+    function rollSkill(input, bonus) {
+        if(input === event.target && input.value === "") return; // Don't roll empty on click-through
+        const skillName = input.value || "Unnamed Skill";
+        
+        let total = 0;
+        let symbols = "";
+        for(let i=0; i<4; i++) {
+            let r = Math.floor(Math.random() * 3) - 1; 
+            total += r;
+            symbols += (r === -1) ? "➖" : (r === 0) ? "⬜" : "➕";
+        }
+        let final = total + bonus;
+        
+        let ladder = {
+            "-2": "Terrible", "-1": "Poor", "0": "Mediocre", "1": "Average", 
+            "2": "Fair", "3": "Good", "4": "Great", "5": "Superb", 
+            "6": "Fantastic", "7": "Epic", "8": "Legendary"
+        };
+        let adj = ladder[final] || (final > 8 ? "Godlike" : "Abysmal");
+
+        const desc = `**Skill:** ${skillName} (+${bonus})\n**Dice:** ${symbols} (${total > 0 ? '+' : ''}${total})\n**Result:** **${final}** (${adj})`;
+        sendToDiscord({ title: `🎲 Rolling ${skillName}`, description: desc, color: 5945834 });
+    }
+</script>
+
+</body>
+</html>
