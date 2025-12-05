@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fate GM Command Center</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #c0392b;
+            --accent: #2980b9;
+            --bg: #eef2f3;
+            --text: #2c3e50;
+            --card-bg: #ffffff;
+            --success: #27ae60;
+            --gold: #f39c12;
+            --purple: #8e44ad;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- LAYOUT GRID --- */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 340px 1fr 340px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .full-width { grid-column: 1 / -1; }
+
+        /* --- INPUTS & BUTTONS --- */
+        input[type="text"], textarea, input[type="number"] {
+            background: #f8f9fa;
+            border: 1px solid #ced6e0;
+            border-radius: 4px;
+            padding: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+        input:focus, textarea:focus {
+            background: white;
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 3px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            color: white;
+        }
+        .btn-primary { background-color: var(--primary); }
+        .btn-success { background-color: var(--success); }
+        .btn-danger { background-color: var(--secondary); }
+        .btn-accent { background-color: var(--accent); }
+        .btn-purple { background-color: var(--purple); }
+        .btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+
+        /* Small button variant */
+        .mini-btn {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+        }
+
+        .tiny-btn {
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            font-size: 14px;
+            line-height: 1;
+            background: #dfe6e9;
+            color: #636e72;
+            border: 1px solid #b2bec3;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .tiny-btn:hover { background: #b2bec3; color: white; }
+
+        /* --- TURN CHECKBOX --- */
+        .turn-toggle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #bdc3c7;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: transparent;
+            margin-right: 8px;
+            user-select: none;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .turn-toggle:hover { border-color: #95a5a6; }
+        .turn-toggle.active {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .turn-toggle::after { content: "✔"; }
+
+        /* --- SECTIONS --- */
+        .controls-area {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .column-header {
+            color: white;
+            padding: 12px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .header-players { background: linear-gradient(135deg, #2980b9, #3498db); }
+        .header-npcs { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+
+        .card-column {
+            background: #dfe6e9;
+            border-radius: 0 0 8px 8px;
+            min-height: 500px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* --- SCENE CENTER --- */
+        .scene-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .scene-img-box {
+            width: 100%;
+            height: 300px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            border: 4px solid #fff;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        .scene-img { width: 100%; height: 100%; object-fit: cover; }
+        .aspect-list { text-align: left; margin-top: 15px; }
+        .aspect-input { margin-bottom: 8px; border-left: 4px solid var(--gold); background: #fffcf5; }
+
+        /* --- CARDS (PC & NPC) --- */
+        .entity-card {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 4px solid transparent;
+        }
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            color: #bdc3c7;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .close-btn:hover { color: var(--secondary); }
+
+        .card-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .card-label {
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #7f8c8d;
+            width: 45px;
+            flex-shrink: 0;
+        }
+        
+        .stress-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+        .stress-track-container { display: flex; gap: 2px; }
+        
+        .stress-box {
+            width: 26px;
+            height: 26px;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #bdc3c7;
+            user-select: none;
+            background: white;
+        }
+        .stress-box:hover { border-color: #7f8c8d; }
+        .stress-box.active { color: white; border-color: transparent; }
+        
+        .pc-card { border-left-color: var(--accent); }
+        .npc-card { border-left-color: var(--secondary); }
+
+        /* Colors */
+        .pc-phys .stress-box.active { background: var(--secondary); }
+        .pc-ment .stress-box.active { background: var(--primary); }
+        .pc-powr .stress-box.active { background: #8e44ad; } 
+        .npc-phys .stress-box.active { background: var(--secondary); }
+        .npc-ment .stress-box.active { background: var(--primary); }
+
+        .gm-pool {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .gm-pool input {
+            background: rgba(0,0,0,0.3);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+            font-size: 2.5rem;
+            width: 80px;
+            height: 80px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .section-label {
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #95a5a6;
+            margin-top: 8px;
+            display: block;
+        }
+
+        /* --- COLLAPSIBLE ASPECT SECTION --- */
+        .toggle-aspect-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 0;
+            margin-top: 5px;
+        }
+        .toggle-aspect-btn:hover { text-decoration: underline; }
+        
+        .collapsible-aspects {
+            display: none;
+            margin-top: 10px;
+            padding: 8px;
+            background: #f1f8ff;
+            border-radius: 4px;
+            border-left: 2px solid var(--accent);
+        }
+        .collapsible-aspects.open { display: block; }
+        
+        .send-chk-label {
+            font-size: 0.75em;
+            display: flex;
+            align-items: center;
+            gap: 5px; 
+            color: var(--purple);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 1100px) {
+            .container { grid-template-columns: 1fr; }
+            .scene-card { order: -1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="full-width controls-area">
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary" onclick="saveScene()">💾 Save</button>
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📂 Load</button>
+            <input type="file" id="fileInput" style="display: none;" onchange="loadScene(this)">
+            <button class="btn btn-success" onclick="resetTurns()">🔄 Reset Turns</button>
+            <button class="btn btn-danger" onclick="resetAllStatus()" title="Clear all stress and conditions">🧹 Reset Stress</button>
+        </div>
+
+        <div style="flex-grow: 1; margin: 0 20px; display: flex; gap: 10px; align-items: center;">
+            <strong>Webhook:</strong>
+            <input type="text" id="webhookUrl" placeholder="Discord Webhook URL..." onchange="saveWebhook()">
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-purple" style="font-size: 1em; padding: 10px 20px;" onclick="sendFullDashboard()">🚀 Send Full Dashboard</button>
+        </div>
+    </div>
+
+    <div>
+        <div class="column-header header-players">
+            <span>🦸 Players</span>
+            <button class="btn btn-primary mini-btn" style="background:rgba(0,0,0,0.3);" onclick="addPlayer()">+ Add</button>
+        </div>
+        <div class="card-column" id="player-column"></div>
+    </div>
+
+    <div>
+        <div class="scene-card">
+            <input type="text" id="sceneName" placeholder="Scene Name (e.g. The Burning Building)" style="font-weight: bold; font-size: 1.3em; margin-bottom: 10px; text-align: center; border:none; border-bottom:2px solid #eee;">
+            
+            <div class="scene-img-box">
+                <img id="sceneImg" src="https://placehold.co/800x400/2c3e50/white?text=Scene+Art" class="scene-img" alt="Scene art">
+            </div>
+            <input type="text" id="sceneImgUrl" placeholder="Paste Image URL..." oninput="updateSceneImg()" style="font-size: 0.8em; margin-bottom: 10px; text-align: center;">
+
+            <div class="aspect-list" id="sceneAspects">
+                <label style="font-weight:bold; font-size:0.9em; color:#7f8c8d;">🌍 SCENE ASPECTS</label>
+                <input type="text" class="aspect-input" placeholder="Aspect 1">
+                <input type="text" class="aspect-input" placeholder="Aspect 2">
+                <input type="text" class="aspect-input" placeholder="Aspect 3">
+            </div>
+        </div>
+
+        <div class="gm-pool">
+            <div style="font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px; opacity: 0.8;">GM Fate Points</div>
+            <input type="number" id="gmFate" value="5" min="0">
+            <div style="display:flex; justify-content:center; gap:10px;">
+                <button class="btn mini-btn" style="background:rgba(255,255,255,0.2); width:40px;" onclick="modFate(1)">+</button>
+                <button class="btn mini-btn" style="background:rgba(255,255,255,0.2); width:40px;" onclick="modFate(-1)">-</button>
+            </div>
+        </div>
+
+        <div class="scene-card" style="margin-top: 20px; text-align: left;">
+            <label style="font-weight:bold; color:var(--primary);">🎲 GM Quick Roller</label>
+            <div style="display:flex; gap:5px; margin-top:5px;">
+                <input type="text" id="rollReason" placeholder="Skill/Reason...">
+                <input type="number" id="rollBonus" value="0" style="width: 60px;">
+                <button class="btn btn-primary" onclick="rollDice()">Roll</button>
+            </div>
+            <div id="rollResult" style="margin-top:10px; font-weight:bold; color: var(--secondary); font-size: 1.1em; text-align: center; min-height: 1.2em;"></div>
+        </div>
+    </div>
+
+    <div>
+        <div class="column-header header-npcs">
+            <span>💀 Opposition</span>
+            <button class="btn btn-primary mini-btn" style="background:rgba(0,0,0,0.3);" onclick="addNPC()">+ Add</button>
+        </div>
+        <div class="card-column" id="npc-column"></div>
+    </div>
+</div>
+
+<script>
+    // --- SETUP & UTILS ---
+    window.onload = function() {
+        // Restore webhook from localStorage if available
+        try {
+            const savedWebhook = localStorage.getItem('fateGM_webhook');
+            if (savedWebhook) {
+                document.getElementById('webhookUrl').value = savedWebhook;
+            }
+        } catch (e) {
+            console.warn("Local storage unavailable, webhook URL won't persist.", e);
+        }
+
+        if (document.getElementById('player-column').children.length === 0) addPlayer("Player 1");
+        if (document.getElementById('npc-column').children.length === 0) addNPC("Mook");
+    };
+
+    function updateSceneImg() {
+        const url = document.getElementById('sceneImgUrl').value.trim();
+        const img = document.getElementById('sceneImg');
+        if (url) {
+            img.src = url;
+        } else {
+            img.src = "https://placehold.co/800x400/2c3e50/white?text=Scene+Art";
+        }
+    }
+
+    function modFate(val) {
+        const el = document.getElementById('gmFate');
+        const current = parseInt(el.value) || 0;
+        let next = current + val;
+        if (next < 0) next = 0;
+        el.value = next;
+    }
+    
+    function resetTurns() {
+        document.querySelectorAll('.turn-toggle').forEach(el => el.classList.remove('active'));
+    }
+
+    function resetAllStatus() {
+        // Clear all stress boxes and PC conditions
+        document.querySelectorAll('.stress-box.active').forEach(box => box.classList.remove('active'));
+        document.querySelectorAll('.cond-winded, .cond-burned, .cond-scarred').forEach(chk => {
+            chk.checked = false;
+        });
+    }
+
+    function saveWebhook() {
+        try {
+            const url = document.getElementById('webhookUrl').value;
+            localStorage.setItem('fateGM_webhook', url);
+        } catch (e) {
+            console.warn("Unable to persist webhook URL.", e);
+        }
+    }
+
+    function toggleAspects(btn) {
+        const content = btn.parentElement.querySelector('.collapsible-aspects');
+        content.classList.toggle('open');
+        btn.innerHTML = content.classList.contains('open') ? "▲ Hide Aspects" : "▼ Show Aspects";
+    }
+
+    // --- STRESS BOX LOGIC ---
+    function createStressHTML(cssClass, count) {
+        let boxes = '';
+        for(let i=1; i<=count; i++) {
+            boxes += `<div class="stress-box" onclick="this.classList.toggle('active')">${i}</div>`;
+        }
+        return `
+            <button class="tiny-btn" onclick="adjustStress(this, -1)">-</button>
+            <div class="stress-track-container">${boxes}</div>
+            <button class="tiny-btn" onclick="adjustStress(this, 1)">+</button>
+        `;
+    }
+
+    function adjustStress(btn, amount) {
+        const container = btn.parentElement.querySelector('.stress-track-container');
+        const currentCount = container.children.length;
+        if (amount > 0) {
+            if(currentCount >= 10) return; 
+            const newBox = document.createElement('div');
+            newBox.className = 'stress-box';
+            newBox.innerText = currentCount + 1;
+            newBox.onclick = function() { this.classList.toggle('active'); };
+            container.appendChild(newBox);
+        } else {
+            if(currentCount <= 1) return;
+            container.lastElementChild.remove();
+        }
+    }
+
+    // --- DOM GENERATION: PLAYER ---
+    function addPlayer(name="") {
+        const div = document.createElement('div');
+        div.className = 'entity-card pc-card';
+        div.innerHTML = `
+            <span class="close-btn" onclick="this.parentElement.remove()">×</span>
+            <div class="card-row">
+                <div class="turn-toggle" onclick="this.classList.toggle('active')" title="Popcorn Initiative: Click to take turn"></div>
+                <input type="text" class="pc-name" placeholder="Character Name" value="${name}" style="font-weight:bold;">
+                <input type="number" class="pc-fp" value="3" min="0" title="Fate Points" style="width: 50px; text-align:center; border-color:var(--gold); font-weight:bold;">
+            </div>
+            
+            <div class="stress-row pc-phys">
+                <span class="card-label">Phys</span>
+                ${createStressHTML('pc-phys', 4)}
+            </div>
+            <div class="stress-row pc-ment">
+                <span class="card-label">Ment</span>
+                ${createStressHTML('pc-ment', 4)}
+            </div>
+            <div class="stress-row pc-powr">
+                <span class="card-label" style="color:#8e44ad;">Power</span>
+                ${createStressHTML('pc-powr', 3)}
+            </div>
+
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; background:#f9f9f9; padding:5px; border-radius:4px;">
+                <label style="font-size:0.75em; cursor:pointer;"><input type="checkbox" class="cond-winded"> Winded</label>
+                <label style="font-size:0.75em; cursor:pointer;"><input type="checkbox" class="cond-burned"> Burned</label>
+                <label style="font-size:0.75em; cursor:pointer;"><input type="checkbox" class="cond-scarred"> Scarred</label>
+            </div>
+            
+            <span class="section-label">Consequences / Notes</span>
+            <textarea class="pc-notes" rows="1" placeholder="Mild: ..."></textarea>
+
+            <button class="toggle-aspect-btn" onclick="toggleAspects(this)">▼ Show Aspects</button>
+            <div class="collapsible-aspects">
+                <label class="send-chk-label"><input type="checkbox" class="pc-send-aspects"> Include in Discord</label>
+                <input type="text" class="pc-hc" placeholder="High Concept" style="font-weight:bold; margin-bottom:5px;">
+                <textarea class="pc-other-aspects" rows="3" placeholder="Trouble: ...&#10;Other Aspect: ..."></textarea>
+            </div>
+        `;
+        document.getElementById('player-column').appendChild(div);
+    }
+
+    // --- DOM GENERATION: NPC ---
+    function addNPC(name="") {
+        const div = document.createElement('div');
+        div.className = 'entity-card npc-card';
+        div.innerHTML = `
+            <span class="close-btn" onclick="this.parentElement.remove()">×</span>
+            <div class="card-row">
+                <div class="turn-toggle" onclick="this.classList.toggle('active')" title="Popcorn Initiative: Click to take turn"></div>
+                <input type="text" class="npc-name" placeholder="NPC Name" value="${name}" style="font-weight:bold;">
+            </div>
+            <input type="text" class="npc-aspect" placeholder="High Concept / Role" style="font-size:0.9em; margin-bottom:5px; font-style:italic;">
+            
+            <span class="section-label">Stress</span>
+            <div class="stress-row npc-phys">
+                <span class="card-label">Phys</span>
+                ${createStressHTML('npc-phys', 2)}
+            </div>
+            <div class="stress-row npc-ment">
+                <span class="card-label">Ment</span>
+                ${createStressHTML('npc-ment', 2)}
+            </div>
+
+            <span class="section-label">Skills & Stunts</span>
+            <textarea class="npc-skills" rows="3" placeholder="Good (+3) Fight&#10;Fair (+2) Stealth&#10;Stunt: +2 Defense vs Range"></textarea>
+
+            <label class="send-chk-label" style="margin-top:10px;"><input type="checkbox" class="npc-send-aspects"> Include in Discord</label>
+            <span class="section-label" style="margin-top:0;">Aspects & Consequences</span>
+            <textarea class="npc-notes" rows="2" placeholder="Trouble..."></textarea>
+        `;
+        document.getElementById('npc-column').appendChild(div);
+    }
+
+    // --- SAVE / LOAD ---
+    function saveScene() {
+        const data = {
+            scene: {
+                name: document.getElementById('sceneName').value,
+                img: document.getElementById('sceneImgUrl').value,
+                aspects: Array.from(document.querySelectorAll('.aspect-input')).map(i => i.value),
+                gmFate: document.getElementById('gmFate').value
+            },
+            players: [],
+            npcs: []
+        };
+        // Scrape Players
+        document.querySelectorAll('#player-column .entity-card').forEach(card => {
+            data.players.push({
+                name: card.querySelector('.pc-name').value,
+                turn: card.querySelector('.turn-toggle').classList.contains('active'),
+                fp: card.querySelector('.pc-fp').value,
+                phys: getStressData(card.querySelector('.pc-phys')),
+                ment: getStressData(card.querySelector('.pc-ment')),
+                power: getStressData(card.querySelector('.pc-powr')),
+                cond: {
+                    w: card.querySelector('.cond-winded').checked,
+                    b: card.querySelector('.cond-burned').checked,
+                    s: card.querySelector('.cond-scarred').checked
+                },
+                notes: card.querySelector('.pc-notes').value,
+                hc: card.querySelector('.pc-hc').value,
+                aspects: card.querySelector('.pc-other-aspects').value,
+                sendAspects: card.querySelector('.pc-send-aspects').checked
+            });
+        });
+        // Scrape NPCs
+        document.querySelectorAll('#npc-column .entity-card').forEach(card => {
+            data.npcs.push({
+                name: card.querySelector('.npc-name').value,
+                turn: card.querySelector('.turn-toggle').classList.contains('active'),
+                aspect: card.querySelector('.npc-aspect').value,
+                phys: getStressData(card.querySelector('.npc-phys')),
+                ment: getStressData(card.querySelector('.npc-ment')),
+                skills: card.querySelector('.npc-skills').value,
+                notes: card.querySelector('.npc-notes').value,
+                sendAspects: card.querySelector('.npc-send-aspects').checked
+            });
+        });
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = (data.scene.name || "Scene") + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function loadScene(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                document.getElementById('sceneName').value = data.scene.name || "";
+                document.getElementById('sceneImgUrl').value = data.scene.img || "";
+                updateSceneImg();
+                document.getElementById('gmFate').value = data.scene.gmFate || 5;
+                const aspects = document.querySelectorAll('.aspect-input');
+                if (data.scene.aspects && Array.isArray(data.scene.aspects)) {
+                    data.scene.aspects.forEach((val, i) => { if(aspects[i]) aspects[i].value = val; });
+                }
+
+                const pCol = document.getElementById('player-column');
+                pCol.innerHTML = "";
+                data.players.forEach(p => {
+                    addPlayer(p.name);
+                    const card = pCol.lastElementChild;
+                    if(p.turn) card.querySelector('.turn-toggle').classList.add('active');
+                    card.querySelector('.pc-fp').value = p.fp;
+                    restoreStressTrack(card.querySelector('.pc-phys'), p.phys);
+                    restoreStressTrack(card.querySelector('.pc-ment'), p.ment);
+                    restoreStressTrack(card.querySelector('.pc-powr'), p.power);
+                    card.querySelector('.cond-winded').checked = p.cond.w;
+                    card.querySelector('.cond-burned').checked = p.cond.b;
+                    card.querySelector('.cond-scarred').checked = p.cond.s;
+                    card.querySelector('.pc-notes').value = p.notes;
+                    card.querySelector('.pc-hc').value = p.hc || "";
+                    card.querySelector('.pc-other-aspects').value = p.aspects || "";
+                    card.querySelector('.pc-send-aspects').checked = p.sendAspects || false;
+                });
+
+                const nCol = document.getElementById('npc-column');
+                nCol.innerHTML = "";
+                data.npcs.forEach(n => {
+                    addNPC(n.name);
+                    const card = nCol.lastElementChild;
+                    if(n.turn) card.querySelector('.turn-toggle').classList.add('active');
+                    card.querySelector('.npc-aspect').value = n.aspect;
+                    card.querySelector('.npc-skills').value = n.skills || "";
+                    card.querySelector('.npc-notes').value = n.notes;
+                    restoreStressTrack(card.querySelector('.npc-phys'), n.phys);
+                    restoreStressTrack(card.querySelector('.npc-ment'), n.ment);
+                    card.querySelector('.npc-send-aspects').checked = n.sendAspects || false;
+                });
+            } catch(err) {
+                console.error(err);
+                alert("Error loading scene.");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // --- STRESS HELPERS ---
+    function getStressData(row) {
+        const container = row.querySelector('.stress-track-container');
+        const total = container.children.length;
+        const active = [];
+        container.querySelectorAll('.stress-box').forEach((box, i) => {
+            if(box.classList.contains('active')) active.push(i);
+        });
+        return { total, active };
+    }
+    function restoreStressTrack(row, data) {
+        if(!data) return; 
+        const container = row.querySelector('.stress-track-container');
+        container.innerHTML = ''; 
+        for(let i=1; i<=data.total; i++) {
+            const newBox = document.createElement('div');
+            newBox.className = 'stress-box';
+            newBox.innerText = i;
+            newBox.onclick = function() { this.classList.toggle('active'); };
+            if(data.active.includes(i-1)) newBox.classList.add('active');
+            container.appendChild(newBox);
+        }
+    }
+
+    // --- WEBHOOK LOGIC ---
+    async function sendToDiscord(payload) {
+        const url = document.getElementById('webhookUrl').value;
+        if(!url) return alert("Missing Webhook URL");
+        try {
+            await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        } catch(e) {
+            console.error(e);
+            alert("Network Error");
+        }
+    }
+
+    function sendFullDashboard() {
+        const sceneName = document.getElementById('sceneName').value || "Current Scene";
+        const sceneImg = document.getElementById('sceneImgUrl').value;
+        let aspects = "";
+        document.querySelectorAll('.aspect-input').forEach(i => { if(i.value) aspects += `**•** ${i.value}\n`; });
+        const gmFate = document.getElementById('gmFate').value;
+
+        // Player Data
+        let pList = "";
+        document.querySelectorAll('#player-column .entity-card').forEach(c => {
+            const n = c.querySelector('.pc-name').value || "Unknown";
+            const turn = c.querySelector('.turn-toggle').classList.contains('active') ? "✅" : "⬜";
+            const fp = c.querySelector('.pc-fp').value;
+            const phA = c.querySelectorAll('.pc-phys .active').length;
+            const phT = c.querySelectorAll('.pc-phys .stress-box').length;
+            const mnA = c.querySelectorAll('.pc-ment .active').length;
+            const mnT = c.querySelectorAll('.pc-ment .stress-box').length;
+            const pwA = c.querySelectorAll('.pc-powr .active').length;
+            
+            // Conditions
+            let conds = [];
+            if(c.querySelector('.cond-winded').checked) conds.push("⚠️ Winded");
+            if(c.querySelector('.cond-burned').checked) conds.push("🔥 Burned");
+            if(c.querySelector('.cond-scarred').checked) conds.push("🤕 Scarred");
+            
+            // Notes
+            const notes = c.querySelector('.pc-notes').value;
+            
+            // Aspects (If Checked)
+            let aspTxt = "";
+            if(c.querySelector('.pc-send-aspects').checked) {
+                const hc = c.querySelector('.pc-hc').value;
+                const oa = c.querySelector('.pc-other-aspects').value;
+                if(hc) aspTxt += `> **HC:** ${hc}\n`;
+                if(oa) aspTxt += `> ${oa.replace(/\n/g, '\n> ')}\n`;
+            }
+
+            pList += `${turn} **${n}** (FP:${fp})\n└ P:${phA}/${phT} M:${mnA}/${mnT} Pow:${pwA}\n`;
+            if(conds.length > 0) pList += `└ ${conds.join(", ")}\n`;
+            if(notes) pList += `📝 *${notes}*\n`;
+            if(aspTxt) pList += aspTxt;
+            pList += "\n";
+        });
+
+        // NPC Data
+        let nList = "";
+        document.querySelectorAll('#npc-column .entity-card').forEach(c => {
+            const n = c.querySelector('.npc-name').value || "Enemy";
+            const turn = c.querySelector('.turn-toggle').classList.contains('active') ? "✅" : "⬜";
+            const aspect = c.querySelector('.npc-aspect').value;
+            const pA = c.querySelectorAll('.npc-phys .active').length;
+            const pT = c.querySelectorAll('.npc-phys .stress-box').length;
+            const mA = c.querySelectorAll('.npc-ment .active').length;
+            const mT = c.querySelectorAll('.npc-ment .stress-box').length;
+            
+            const skills = c.querySelector('.npc-skills').value;
+            
+            // Aspects/Notes (If Checked)
+            let aspTxt = "";
+            if(c.querySelector('.npc-send-aspects').checked) {
+                const notes = c.querySelector('.npc-notes').value;
+                if(notes) aspTxt += `> ${notes.replace(/\n/g, '\n> ')}\n`;
+            }
+
+            nList += `${turn} **${n}**\n`;
+            if (aspect) nList += `└ _${aspect}_\n`;
+            nList += `└ P:${pA}/${pT} | M:${mA}/${mT}\n`;
+            if(skills) nList += `⚔️ *${skills.split('\n')[0]}...*\n`;
+            if(aspTxt) nList += aspTxt;
+            nList += "\n";
+        });
+
+        const payload = {
+            username: "Game Master",
+            embeds: [{
+                title: `📍 ${sceneName}`,
+                description: aspects ? `**Scene Aspects:**\n${aspects}` : "",
+                image: { url: sceneImg },
+                footer: { text: `GM Fate Points: ${gmFate}` },
+                color: 5793266,
+                fields: [
+                    { name: "🦸 Heroes", value: pList || "None", inline: true },
+                    { name: "💀 Opposition", value: nList || "None", inline: true }
+                ]
+            }]
+        };
+        sendToDiscord(payload);
+    }
+
+    function rollDice() {
+        const reason = document.getElementById('rollReason').value;
+        const bonus = parseInt(document.getElementById('rollBonus').value) || 0;
+        let total = 0, symbols = "";
+        for(let i=0; i<4; i++) {
+            let r = Math.floor(Math.random()*3)-1;
+            total += r;
+            symbols += (r===-1?"➖":(r===0?"⬜":"➕"));
+        }
+        const final = total + bonus;
+        let ladder = {
+            "-2": "Terrible", "-1": "Poor", "0": "Mediocre",
+            "1": "Average", "2": "Fair", "3": "Good",
+            "4": "Great", "5": "Superb", "6": "Fantastic",
+            "7": "Epic", "8": "Legendary"
+        };
+        let adj = ladder[final] || (final>8 ? "Godlike" : "Abysmal");
+
+        // Show dice symbols on the dashboard as well
+        document.getElementById('rollResult').innerText = `Dice: ${symbols}  ➜  Total: ${final} (${adj})`;
+
+        const payload = {
+            username: "Game Master",
+            embeds: [{
+                title: reason ? `🎲 Rolling: ${reason}` : "🎲 GM Roll",
+                description: `**Dice:** ${symbols} (${total > 0 ? '+'+total : total})\n**Bonus:** ${bonus}\n**Total:** __**${final}**__ (${adj})`,
+                color: 9807270
+            }]
+        };
+        sendToDiscord(payload);
+    }
+</script>
+</body>
+</html>
