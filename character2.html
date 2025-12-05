@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fate Generic Character Sheet (Dark Mode)</title>
+    <style>
+        :root {
+            /* Dark Mode Palette */
+            --primary: #5AB9EA;
+            --secondary: #9d7ce6; /* Slightly lighter for contrast on dark */
+            --accent: #5680E9;
+            --bg: #121212;
+            --text: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --danger: #ff6b6b;
+            --success: #2ecc71;
+            --gold: #f1c40f;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --border-color: #444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            background-image: linear-gradient(120deg, #1a1a1a 0%, #000000 100%);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 20px;
+        }
+
+        .full-width { grid-column: 1 / -1; }
+
+        /* --- INPUT STYLING --- */
+        input[type="text"], textarea, input[type="number"] {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-family: inherit;
+            color: var(--text);
+            width: 100%;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+        input[type="text"]:focus, textarea:focus, input[type="number"]:focus {
+            background: #2c2c2c;
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 5px rgba(90, 185, 234, 0.3);
+        }
+        
+        .clean-input {
+            border: none;
+            background: transparent;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: var(--text);
+            padding: 0;
+        }
+        .clean-input:focus { background: #333; padding: 4px; }
+
+        /* Header Inputs */
+        .header-input {
+            background: transparent !important;
+            border: none;
+            color: white !important;
+            text-align: left;
+            width: 100%;
+        }
+        .header-input::placeholder { color: rgba(255,255,255,0.7); }
+        .h1-input { font-size: 2.5rem; font-weight: bold; margin-bottom: 5px; }
+        .h2-input { font-size: 1.2rem; font-style: italic; font-weight: 300; }
+        .desc-input { 
+            font-size: 0.95rem; margin-bottom: 10px; resize: vertical; 
+            background: rgba(0,0,0,0.3) !important; border-radius: 4px; padding: 5px;
+        }
+
+        /* Fate Point Counter */
+        .fp-container {
+            display: flex; flex-direction: column; align-items: center; 
+            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;
+            min-width: 80px; margin-left: 15px;
+        }
+        .fp-input {
+            font-size: 2rem; font-weight: bold; text-align: center; color: white !important;
+            background: transparent !important; border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50%; width: 60px; height: 60px; padding: 0;
+            margin-bottom: 5px; -moz-appearance: textfield;
+        }
+        .fp-input::-webkit-outer-spin-button, .fp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .fp-label { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Controls */
+        .controls-area {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-controls { display: flex; gap: 10px; }
+        
+        .btn {
+            border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 5px; font-size: 0.9rem;
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-secondary { background-color: #555; color: white; }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        /* Header Card */
+        .header-card {
+            background: linear-gradient(135deg, var(--primary), #2a5298);
+            color: white; padding: 25px; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+
+        /* Image */
+        .image-card {
+            background: var(--card-bg); padding: 10px; border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); text-align: center;
+        }
+        .char-img-container {
+            width: 100%; height: 300px; background-color: #333; border-radius: 8px;
+            overflow: hidden; margin-bottom: 10px; border: 4px solid #333;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        .char-img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg); border-radius: 10px; padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: relative; margin-bottom: 20px;
+        }
+
+        h3 {
+            border-bottom: 2px solid var(--primary); padding-bottom: 5px; margin-top: 0;
+            color: var(--secondary); display: flex; justify-content: space-between; align-items: center;
+        }
+        .mini-btn {
+            background: none; border: none; cursor: pointer; font-size: 1.2rem; opacity: 0.5; transition: 0.2s;
+        }
+        .mini-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        /* POWER SECTION STYLES */
+        .power-card { border: 2px solid var(--secondary); }
+        .power-guide {
+            font-size: 0.85em; background: #252525; padding: 10px; border-radius: 6px;
+            border-left: 3px solid var(--secondary); margin-top: 15px;
+        }
+        .power-guide input.tier-header {
+            font-weight: bold; color: var(--secondary); margin-top: 5px; border:none; background: transparent;
+        }
+        .power-guide textarea {
+            font-size: 0.95em; min-height: 50px; resize: vertical; margin-bottom: 5px;
+        }
+        .condition-row {
+            display: flex; gap: 5px; margin-bottom: 5px; align-items: center;
+        }
+        .condition-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--secondary); }
+
+        /* STRESS TRACKS */
+        .track-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .track-controls { display: flex; gap: 2px; }
+        .track-btn {
+            width: 20px; height: 20px; font-size: 12px; padding: 0; border-radius: 3px;
+            border: 1px solid #444; background: #333; color: #ddd; cursor: pointer;
+        }
+        .stress-track { display: flex; gap: 5px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
+        .stress-box {
+            width: 30px; height: 30px; border: 2px solid #555; border-radius: 4px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #555; user-select: none; transition: 0.2s; background: #2a2a2a;
+        }
+        .stress-box:hover { border-color: var(--danger); }
+        .stress-box.active { background-color: var(--danger); border-color: var(--danger); color: white; }
+        .power-box { border-color: var(--secondary); }
+        .power-box.active { background-color: var(--secondary); border-color: var(--secondary); color: white; }
+
+        /* SKILLS */
+        .skill-tier { display: flex; align-items: flex-start; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #333; }
+        .skill-val { font-weight: 900; color: var(--accent); width: 40px; font-size: 1.1em; flex-shrink: 0; padding-top: 5px; }
+        .skill-container { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+        .skill-chip-wrapper { position: relative; width: 110px; }
+        .skill-input {
+            background: #2a2a2a; border: 1px solid #444; border-radius: 4px;
+            padding: 4px 10px; font-size: 0.9em; text-align: center; width: 100%; color: #eee;
+        }
+        .skill-input:hover { border-color: var(--primary); }
+
+        /* STUNTS */
+        .stunt-card {
+            border-left: 3px solid var(--secondary); padding-left: 10px; margin-bottom: 10px;
+            position: relative; background: #252525; padding: 10px; border-radius: 0 4px 4px 0;
+        }
+        .delete-stunt { position: absolute; top: 5px; right: 5px; color: var(--danger); cursor: pointer; opacity: 0.5; font-weight: bold; }
+        .delete-stunt:hover { opacity: 1; }
+
+        @media (max-width: 700px) {
+            .container { grid-template-columns: 1fr; }
+            .char-img-container { height: 250px; }
+            .header-card { flex-direction: column; }
+            .fp-container { margin-left: 0; margin-top: 15px; width: 100%; flex-direction: row; justify-content: center; gap: 10px;}
+        }
+    </style>
+</head>
+<body>
+
+<datalist id="fateSkills">
+    <option value="Academics">
+    <option value="Athletics">
+    <option value="Burglary">
+    <option value="Contacts">
+    <option value="Crafts">
+    <option value="Deceive">
+    <option value="Drive">
+    <option value="Empathy">
+    <option value="Fight">
+    <option value="Investigate">
+    <option value="Lore">
+    <option value="Notice">
+    <option value="Physique">
+    <option value="Provoke">
+    <option value="Rapport">
+    <option value="Resources">
+    <option value="Shoot">
+    <option value="Stealth">
+    <option value="Will">
+</datalist>
+
+<div class="container">
+    
+    <div class="full-width controls-area">
+        <div class="file-controls">
+            <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📂 Load JSON</button>
+            <input type="file" id="fileInput" style="display: none;" onchange="loadCharacter(this)">
+            <button class="btn btn-secondary" onclick="saveCharacter()">💾 Save JSON</button>
+        </div>
+
+        <div style="flex-grow: 1; margin: 0 20px; display: flex; gap: 10px; align-items: center;">
+            <span>🔗 Webhook:</span>
+            <input type="text" id="webhookUrl" value="https://discord.com/api/webhooks/1209724299964059648/GuMJ84RoseRXp1sopGezGBsYRSmI2zEdcsI2jM00Af6GHfVmpE91gKWe7g53gLIvFt1G" style="flex-grow:1;">
+        </div>
+        
+        <button class="btn btn-success" onclick="sendFullSheet()">📤 Send Sheet</button>
+    </div>
+
+    <div>
+        <div class="image-card">
+            <div class="char-img-container">
+                <img id="charImage" src="https://placehold.co/400x600/333333/white?text=No+Image" alt="Character" class="char-img">
+            </div>
+            <input type="text" id="imageUrlInput" placeholder="Paste Image URL..." oninput="updateImage()">
+        </div>
+
+        <div class="card power-card" style="margin-top: 20px;">
+            <h3>
+                <input type="text" id="powerName" class="clean-input" value="Primary Power" style="width: 70%; color: var(--secondary);">
+                <button class="mini-btn" onclick="sendPowerStatus()" title="Send Power Status">⚡</button>
+            </h3>
+            
+            <div class="track-header">
+                <small>Power Stress</small>
+                <div class="track-controls">
+                    <button class="track-btn" onclick="adjustTrack('powerTrack', -1)">-</button>
+                    <button class="track-btn" onclick="adjustTrack('powerTrack', 1)">+</button>
+                </div>
+            </div>
+            <div class="stress-track" id="powerTrack" data-count="3">
+                </div>
+
+            <div class="condition-list">
+                <div class="condition-row">
+                    <input type="checkbox" id="pcond1-chk">
+                    <div style="width: 100%;">
+                        <input type="text" id="pcond1-name" placeholder="Condition 1 (e.g. Winded)" style="font-weight: bold; margin-bottom: 2px;">
+                        <input type="text" id="pcond1-desc" placeholder="Effect (e.g. -2 actions)" style="font-size: 0.8em; color: #999;">
+                    </div>
+                </div>
+                <div class="condition-row">
+                    <input type="checkbox" id="pcond2-chk">
+                    <div style="width: 100%;">
+                        <input type="text" id="pcond2-name" placeholder="Condition 2 (e.g. Burned Out)" style="font-weight: bold; margin-bottom: 2px;">
+                        <input type="text" id="pcond2-desc" placeholder="Effect (e.g. Power Offline)" style="font-size: 0.8em; color: #999;">
+                    </div>
+                </div>
+                <div class="condition-row">
+                    <input type="checkbox" id="pcond3-chk">
+                    <div style="width: 100%;">
+                        <input type="text" id="pcond3-name" placeholder="Condition 3 (e.g. Scarred)" style="font-weight: bold; margin-bottom: 2px;">
+                        <input type="text" id="pcond3-desc" placeholder="Effect (e.g. Permanent change)" style="font-size: 0.8em; color: #999;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="power-guide">
+                <strong>⚡ Manual: Cost per Effect</strong>
+                
+                <input type="text" id="tier1-head" class="tier-header" value="Tier 1 (1 Box)">
+                <textarea id="tier1-text" placeholder="- Effect 1&#10;- Effect 2"></textarea>
+
+                <input type="text" id="tier2-head" class="tier-header" value="Tier 2 (2 Boxes)">
+                <textarea id="tier2-text" placeholder="- Effect 1&#10;- Effect 2"></textarea>
+
+                <input type="text" id="tier3-head" class="tier-header" value="Tier 3 (3 Boxes)">
+                <textarea id="tier3-text" placeholder="- Effect 1&#10;- Effect 2"></textarea>
+
+                <input type="text" id="limit-head" class="tier-header" value="🚫 Limits" style="color: var(--danger);">
+                <textarea id="limit-text" placeholder="Weaknesses or constraints..."></textarea>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Health & Stress <button class="mini-btn" onclick="sendStressStatus()" title="Send Health">🚑</button></h3>
+            
+            <div class="track-header">
+                <span>Physical</span>
+                <div class="track-controls">
+                    <button class="track-btn" onclick="adjustTrack('track1', -1)">-</button>
+                    <button class="track-btn" onclick="adjustTrack('track1', 1)">+</button>
+                </div>
+            </div>
+            <div class="stress-track" id="track1" data-count="3"></div>
+
+            <div class="track-header">
+                <span>Mental</span>
+                <div class="track-controls">
+                    <button class="track-btn" onclick="adjustTrack('track2', -1)">-</button>
+                    <button class="track-btn" onclick="adjustTrack('track2', 1)">+</button>
+                </div>
+            </div>
+            <div class="stress-track" id="track2" data-count="3"></div>
+
+            <h4 style="margin: 10px 0 5px; font-size:0.9em; color:#999;">Active Complications</h4>
+            <textarea id="consequences" rows="3" placeholder="Mild: ...&#10;Moderate: ..."></textarea>
+        </div>
+    </div>
+
+    <div>
+        <div class="header-card">
+            <div style="flex-grow: 1;">
+                <input type="text" id="charName" class="header-input h1-input" placeholder="Character Name">
+                
+                <textarea id="charDesc" class="header-input desc-input" placeholder="Character description, pronouns, or background..." rows="2"></textarea>
+                
+                <input type="text" id="charConcept" class="header-input h2-input" placeholder="High Concept (e.g. Knight of the Cross)">
+            </div>
+            
+            <div class="fp-container">
+                <input type="number" id="fatePoints" value="3" class="fp-input">
+                <div class="fp-label">Fate Pts</div>
+                <button class="mini-btn" onclick="sendFateUpdate()" title="Spend/Earn Fate Point" style="color: white; margin-top:5px;">🪙</button>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h3>Aspects <button class="mini-btn" onclick="sendAspects()" title="Send Aspects">📜</button></h3>
+            <div id="aspects-list">
+                <input type="text" id="aspect-trouble" placeholder="Trouble Aspect" style="margin-bottom: 8px;">
+                <input type="text" class="generic-aspect" placeholder="Aspect 3" style="margin-bottom: 8px;">
+                <input type="text" class="generic-aspect" placeholder="Aspect 4" style="margin-bottom: 8px;">
+                <input type="text" class="generic-aspect" placeholder="Aspect 5" style="margin-bottom: 8px;">
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Skills <button class="mini-btn" onclick="sendSkills()" title="Send Skills">📊</button></h3>
+            <div id="skills-area">
+                <div class="skill-tier"><span class="skill-val">+4</span>
+                    <div class="skill-container">
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 4)"></div>
+                    </div>
+                </div>
+                <div class="skill-tier"><span class="skill-val">+3</span>
+                    <div class="skill-container">
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 3)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 3)"></div>
+                    </div>
+                </div>
+                <div class="skill-tier"><span class="skill-val">+2</span>
+                    <div class="skill-container">
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 2)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 2)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 2)"></div>
+                    </div>
+                </div>
+                <div class="skill-tier"><span class="skill-val">+1</span>
+                    <div class="skill-container">
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 1)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 1)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 1)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 1)"></div>
+                    </div>
+                </div>
+                 <div class="skill-tier" style="border-bottom:none;">
+                    <span class="skill-val" style="color:#666;">+0</span>
+                    <div class="skill-container">
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0)"></div>
+                        <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0)"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Stunts <button class="mini-btn" onclick="sendStunts()" title="Send Stunts">⚡</button></h3>
+            <div id="stunts-list"></div>
+            <button class="btn btn-primary" style="margin-top:10px; width:100%; justify-content:center;" onclick="addStunt()">+ Add Stunt</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- INITIALIZATION ---
+    window.onload = function() {
+        renderStress('powerTrack', 'power-box');
+        renderStress('track1');
+        renderStress('track2');
+        if(document.getElementById('stunts-list').children.length === 0) { addStunt(); }
+    }
+
+    // --- LOGIC ---
+    function updateImage() {
+        const url = document.getElementById('imageUrlInput').value;
+        if(url) document.getElementById('charImage').src = url;
+    }
+
+    function adjustTrack(trackId, change) {
+        const track = document.getElementById(trackId);
+        let count = parseInt(track.getAttribute('data-count')) || 0;
+        count = Math.max(0, Math.min(10, count + change));
+        track.setAttribute('data-count', count);
+        renderStress(trackId, trackId === 'powerTrack' ? 'power-box' : 'stress-box');
+    }
+
+    function renderStress(trackId, boxClass = 'stress-box') {
+        const track = document.getElementById(trackId);
+        const count = parseInt(track.getAttribute('data-count'));
+        const currentActive = Array.from(track.children).map(c => c.classList.contains('active'));
+        
+        track.innerHTML = '';
+        for(let i=1; i<=count; i++) {
+            const box = document.createElement('div');
+            box.className = `${boxClass}`;
+            if(boxClass === 'stress-box') box.classList.add('stress-box');
+            if(boxClass === 'power-box') box.classList.add('stress-box', 'power-box');
+
+            box.innerText = i;
+            if(currentActive[i-1]) box.classList.add('active');
+            box.onclick = function() { this.classList.toggle('active'); };
+            track.appendChild(box);
+        }
+    }
+
+    function addStunt(name="", desc="") {
+        const list = document.getElementById('stunts-list');
+        const div = document.createElement('div');
+        div.className = 'stunt-card';
+        div.innerHTML = `
+            <span class="delete-stunt" onclick="this.parentElement.remove()">×</span>
+            <input type="text" class="stunt-name-input" placeholder="Stunt Name" value="${name}" style="font-weight:bold; margin-bottom:5px;">
+            <textarea class="stunt-desc-input" placeholder="Effect/Description" rows="2">${desc}</textarea>
+        `;
+        list.appendChild(div);
+    }
+
+    // --- SAVE / LOAD SYSTEM ---
+    function saveCharacter() {
+        const data = {
+            meta: { 
+                name: document.getElementById('charName').value, 
+                img: document.getElementById('imageUrlInput').value,
+                fatePoints: document.getElementById('fatePoints').value 
+            },
+            webhook: document.getElementById('webhookUrl').value,
+            header: { 
+                concept: document.getElementById('charConcept').value,
+                desc: document.getElementById('charDesc').value
+            },
+            aspects: {
+                trouble: document.getElementById('aspect-trouble').value,
+                others: Array.from(document.querySelectorAll('.generic-aspect')).map(el => el.value)
+            },
+            health: ['track1', 'track2'].map(id => ({
+                id: id, count: document.getElementById(id).getAttribute('data-count'),
+                active: Array.from(document.getElementById(id).children).map(c => c.classList.contains('active'))
+            })),
+            consequences: document.getElementById('consequences').value,
+            
+            // POWER DATA
+            power: {
+                name: document.getElementById('powerName').value,
+                track: {
+                    count: document.getElementById('powerTrack').getAttribute('data-count'),
+                    active: Array.from(document.getElementById('powerTrack').children).map(c => c.classList.contains('active'))
+                },
+                conditions: [1,2,3].map(i => ({
+                    checked: document.getElementById(`pcond${i}-chk`).checked,
+                    name: document.getElementById(`pcond${i}-name`).value,
+                    desc: document.getElementById(`pcond${i}-desc`).value
+                })),
+                manual: {
+                    t1h: document.getElementById('tier1-head').value, t1t: document.getElementById('tier1-text').value,
+                    t2h: document.getElementById('tier2-head').value, t2t: document.getElementById('tier2-text').value,
+                    t3h: document.getElementById('tier3-head').value, t3t: document.getElementById('tier3-text').value,
+                    lh: document.getElementById('limit-head').value, lt: document.getElementById('limit-text').value
+                }
+            },
+            skills: Array.from(document.querySelectorAll('.skill-tier')).map(tier => ({
+                bonus: tier.querySelector('.skill-val').innerText,
+                skills: Array.from(tier.querySelectorAll('.skill-input')).map(i => i.value)
+            })),
+            stunts: Array.from(document.querySelectorAll('.stunt-card')).map(card => ({
+                name: card.querySelector('.stunt-name-input').value,
+                desc: card.querySelector('.stunt-desc-input').value
+            }))
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+        
+        // FIX FOR SAVE BUTTON
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = (data.meta.name || "character") + ".json";
+        document.body.appendChild(a); 
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function loadCharacter(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                document.getElementById('charName').value = data.meta.name || "";
+                document.getElementById('imageUrlInput').value = data.meta.img || "";
+                document.getElementById('fatePoints').value = data.meta.fatePoints || "3";
+                updateImage();
+                document.getElementById('webhookUrl').value = data.webhook || "";
+                document.getElementById('charConcept').value = data.header.concept || "";
+                document.getElementById('charDesc').value = data.header.desc || ""; 
+                
+                document.getElementById('aspect-trouble').value = data.aspects.trouble || "";
+                const aspInputs = document.querySelectorAll('.generic-aspect');
+                data.aspects.others.forEach((v, i) => { if(aspInputs[i]) aspInputs[i].value = v; });
+
+                data.health.forEach(h => {
+                    const el = document.getElementById(h.id);
+                    el.setAttribute('data-count', h.count);
+                    renderStress(h.id);
+                    Array.from(el.children).forEach((box, i) => { if(h.active[i]) box.classList.add('active'); });
+                });
+                document.getElementById('consequences').value = data.consequences || "";
+
+                // Load Power
+                if(data.power) {
+                    document.getElementById('powerName').value = data.power.name || "";
+                    const pt = document.getElementById('powerTrack');
+                    pt.setAttribute('data-count', data.power.track.count);
+                    renderStress('powerTrack', 'power-box');
+                    Array.from(pt.children).forEach((box, i) => { if(data.power.track.active[i]) box.classList.add('active'); });
+
+                    data.power.conditions.forEach((c, i) => {
+                        const idx = i+1;
+                        document.getElementById(`pcond${idx}-chk`).checked = c.checked;
+                        document.getElementById(`pcond${idx}-name`).value = c.name;
+                        document.getElementById(`pcond${idx}-desc`).value = c.desc;
+                    });
+                    document.getElementById('tier1-head').value = data.power.manual.t1h; document.getElementById('tier1-text').value = data.power.manual.t1t;
+                    document.getElementById('tier2-head').value = data.power.manual.t2h; document.getElementById('tier2-text').value = data.power.manual.t2t;
+                    document.getElementById('tier3-head').value = data.power.manual.t3h; document.getElementById('tier3-text').value = data.power.manual.t3t;
+                    document.getElementById('limit-head').value = data.power.manual.lh; document.getElementById('limit-text').value = data.power.manual.lt;
+                }
+
+                // Load Skills
+                const tiers = document.querySelectorAll('.skill-tier');
+                data.skills.forEach((dTier, i) => {
+                    if(tiers[i]) {
+                        const inputs = tiers[i].querySelectorAll('.skill-input');
+                        dTier.skills.forEach((sVal, k) => { if(inputs[k]) inputs[k].value = sVal; });
+                    }
+                });
+
+                document.getElementById('stunts-list').innerHTML = "";
+                data.stunts.forEach(s => addStunt(s.name, s.desc));
+            } catch(err) { console.error(err); alert("Error loading file."); }
+        };
+        reader.readAsText(file);
+    }
+
+    // --- DISCORD SENDERS ---
+    async function sendToDiscord(embedData) {
+        const webhookUrl = document.getElementById('webhookUrl').value;
+        if (!webhookUrl) { alert("Please enter a Webhook URL first!"); return; }
+
+        const charName = document.getElementById('charName').value || "Fate Character";
+        const imgUrl = document.getElementById('imageUrlInput').value;
+
+        // Construct Payload
+        const payload = {
+            username: charName,
+            embeds: [embedData]
+        };
+        
+        if (imgUrl && imgUrl.trim() !== "") {
+            payload.avatar_url = imgUrl;
+        }
+
+        try {
+            const response = await fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                alert("Discord Error: " + response.status + " " + response.statusText + "\n" + errText);
+            } else {
+                console.log("Sent successfully.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Network Error: If you are running this file locally on your PC, Discord might be blocking the connection (CORS).");
+        }
+    }
+
+    function sendFateUpdate() {
+        const fp = document.getElementById('fatePoints').value;
+        sendToDiscord({
+            title: "🪙 Fate Points Updated",
+            description: `Current Fate Points: **${fp}**`,
+            color: 15844367
+        });
+    }
+
+    function sendPowerStatus() {
+        const pName = document.getElementById('powerName').value;
+        const boxes = document.querySelectorAll('#powerTrack .active').length;
+        const total = document.getElementById('powerTrack').getAttribute('data-count');
+        
+        let status = "";
+        [1,2,3].forEach(i => {
+            const chk = document.getElementById(`pcond${i}-chk`).checked ? "✅" : "⬜";
+            const name = document.getElementById(`pcond${i}-name`).value;
+            if(name) status += `${chk} **${name}**\n`;
+        });
+
+        const t1 = document.getElementById('tier1-text').value ? `\n**${document.getElementById('tier1-head').value}**` : "";
+        const t3 = document.getElementById('tier3-text').value ? `\n(Highest Tier Available)` : "";
+
+        sendToDiscord({
+            title: `⚡ ${pName} Status`,
+            color: 8937680,
+            description: `**Stress:** ${boxes} / ${total}\n\n**Conditions:**\n${status || "None"}`
+        });
+    }
+
+    function sendFullSheet() {
+        const name = document.getElementById('charName').value || "Unknown";
+        const concept = document.getElementById('charConcept').value || "No Concept";
+        const desc = document.getElementById('charDesc').value;
+        const fp = document.getElementById('fatePoints').value;
+
+        // ASPECTS COLLECTION
+        let aspectTxt = `**Trouble:** ${document.getElementById('aspect-trouble').value}\n`;
+        document.querySelectorAll('.generic-aspect').forEach(i => { if(i.value) aspectTxt += `• ${i.value}\n`; });
+
+        // POWER COLLECTION
+        const pName = document.getElementById('powerName').value;
+        const pStress = document.querySelectorAll('#powerTrack .active').length + "/" + document.getElementById('powerTrack').getAttribute('data-count');
+        let pCond = "";
+        [1,2,3].forEach(i => {
+            const chk = document.getElementById(`pcond${i}-chk`).checked ? "✅" : "⬜";
+            const nm = document.getElementById(`pcond${i}-name`).value;
+            if(nm) pCond += `${chk} ${nm}\n`;
+        });
+        const limits = document.getElementById('limit-text').value;
+        const powerFull = `**Stress:** ${pStress}\n\n**Conditions:**\n${pCond || "None"}\n\n**Limits:**\n${limits || "None"}`;
+
+        // HEALTH COLLECTION
+        const hStress = document.querySelectorAll('#track1 .active').length + "/" + document.getElementById('track1').getAttribute('data-count');
+        const mStress = document.querySelectorAll('#track2 .active').length + "/" + document.getElementById('track2').getAttribute('data-count');
+        const conseq = document.getElementById('consequences').value;
+
+        // SKILLS COLLECTION
+        const skillList = Array.from(document.querySelectorAll('.skill-input')).filter(i => i.value).slice(0, 15).map(i => i.value).join(", ");
+
+        // STUNTS COLLECTION
+        let stuntTxt = "";
+        document.querySelectorAll('.stunt-card').forEach(c => {
+            const sn = c.querySelector('.stunt-name-input').value;
+            const sd = c.querySelector('.stunt-desc-input').value;
+            if(sn) stuntTxt += `**${sn}**: ${sd}\n`;
+        });
+
+        sendToDiscord({
+            title: name,
+            description: `*${concept}*\n\n${desc}\n\n🪙 **Fate Points:** ${fp}`,
+            color: 5945834,
+            fields: [
+                { name: "📜 Aspects", value: aspectTxt, inline: false },
+                { name: `⚡ ${pName}`, value: powerFull, inline: true },
+                { name: "🚑 Health", value: `**Phys:** ${hStress}\n**Men:** ${mStress}\n\n**Consequences:**\n${conseq || "None"}`, inline: true },
+                { name: "📊 Skills", value: skillList || "None", inline: false },
+                { name: "⚡ Stunts", value: stuntTxt || "None", inline: false }
+            ],
+            thumbnail: { url: document.getElementById('imageUrlInput').value }
+        });
+    }
+
+    function sendAspects() {
+        let txt = `**High Concept:** ${document.getElementById('charConcept').value}\n**Trouble:** ${document.getElementById('aspect-trouble').value}\n`;
+        document.querySelectorAll('.generic-aspect').forEach(i => { if(i.value) txt += `• ${i.value}\n`; });
+        sendToDiscord({ title: "📜 Aspects", description: txt, color: 15105570 });
+    }
+    
+    function sendSkills() {
+        let txt = "";
+        document.querySelectorAll('.skill-tier').forEach(t => {
+            const b = t.querySelector('.skill-val').innerText;
+            const s = Array.from(t.querySelectorAll('.skill-input')).map(i=>i.value).filter(v=>v).join(", ");
+            if(s) txt += `**${b}**: ${s}\n`;
+        });
+        sendToDiscord({ title: "📊 Skills", description: txt, color: 3447003 });
+    }
+
+    function sendStunts() {
+        let txt = "";
+        document.querySelectorAll('.stunt-card').forEach(c => {
+            if(c.querySelector('.stunt-name-input').value) 
+                txt += `**${c.querySelector('.stunt-name-input').value}**\n${c.querySelector('.stunt-desc-input').value}\n\n`;
+        });
+        sendToDiscord({ title: "⚡ Stunts", description: txt, color: 10181046 });
+    }
+
+    function sendStressStatus() {
+        const p = document.querySelectorAll('#track1 .active').length + "/" + document.getElementById('track1').getAttribute('data-count');
+        const m = document.querySelectorAll('#track2 .active').length + "/" + document.getElementById('track2').getAttribute('data-count');
+        const c = document.getElementById('consequences').value;
+        sendToDiscord({ title: "🚑 Health Status", description: `**Physical:** ${p}\n**Mental:** ${m}\n\n**Complications:**\n${c}`, color: 15548997 });
+    }
+
+    function rollSkill(input, bonus) {
+        if(input === event.target && !input.value) return;
+        const skill = input.value || "Skill";
+        let total = 0, symbols = "";
+        for(let i=0; i<4; i++) {
+            let r = Math.floor(Math.random()*3)-1;
+            total += r; symbols += (r===-1?"➖":(r===0?"⬜":"➕"));
+        }
+        sendToDiscord({ title: `🎲 ${skill} (+${bonus})`, description: `**Dice:** ${symbols} (${total>0?'+':''}${total})\n**Result:** **${total+bonus}**`, color: 5945834 });
+    }
+</script>
+</body>
+</html>
