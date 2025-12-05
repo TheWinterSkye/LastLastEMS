@@ -6,16 +6,20 @@
     <title>Fate Generic Character Sheet (Dark Mode)</title>
     <style>
         :root {
-            /* Dark Mode Palette */
+            /* RESTORED ORIGINAL COLORS */
             --primary: #5AB9EA;
-            --secondary: #9d7ce6; /* Slightly lighter for contrast on dark */
+            --secondary: #8860D0;
             --accent: #5680E9;
+            
+            /* Dark Mode Backgrounds */
             --bg: #121212;
             --text: #e0e0e0;
             --card-bg: #1e1e1e;
-            --danger: #ff6b6b;
+            --danger: #e74c3c;
             --success: #2ecc71;
             --gold: #f1c40f;
+            
+            /* Input specific */
             --input-bg: rgba(255, 255, 255, 0.05);
             --border-color: #444;
         }
@@ -127,7 +131,8 @@
 
         /* Header Card */
         .header-card {
-            background: linear-gradient(135deg, var(--primary), #2a5298);
+            /* RESTORED ORIGINAL GRADIENT */
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white; padding: 25px; border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             display: flex; justify-content: space-between; align-items: flex-start;
