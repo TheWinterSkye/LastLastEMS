@@ -55,6 +55,12 @@
             box-shadow: 0 0 3px rgba(0,0,0,0.1);
         }
 
+        /* textareas: auto-grow friendly */
+        textarea {
+            resize: vertical;
+            overflow-y: hidden;
+        }
+
         .btn {
             border: none;
             padding: 8px 12px;
@@ -239,9 +245,10 @@
         }
         .stress-track-container { display: flex; gap: 2px; }
         
+        /* slightly smaller boxes so long tracks (like Ment 7) fit cleanly */
         .stress-box {
-            width: 26px;
-            height: 26px;
+            width: 22px;
+            height: 22px;
             border: 2px solid #bdc3c7;
             border-radius: 4px;
             display: flex;
@@ -249,7 +256,7 @@
             justify-content: center;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.9em;
+            font-size: 0.75em;
             color: #bdc3c7;
             user-select: none;
             background: white;
@@ -461,6 +468,23 @@
         return Number.isFinite(n) ? n : fallback;
     }
 
+    function autoSizeTextarea(el) {
+        if (!el) return;
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+    }
+
+    function autoSizeAllTextareas() {
+        document.querySelectorAll('textarea').forEach(autoSizeTextarea);
+    }
+
+    // Auto-resize as you type
+    document.addEventListener('input', function(e) {
+        if (e.target && e.target.tagName === 'TEXTAREA') {
+            autoSizeTextarea(e.target);
+        }
+    });
+
     // --- SETUP & UTILS ---
     window.onload = function() {
         try {
@@ -474,6 +498,8 @@
 
         if (document.getElementById('player-column').children.length === 0) addPlayer("Player 1");
         if (document.getElementById('npc-column').children.length === 0) addNPC("Mook");
+
+        autoSizeAllTextareas();
     };
 
     function updateSceneImg() {
@@ -518,6 +544,7 @@
         const content = btn.parentElement.querySelector('.collapsible-aspects');
         content.classList.toggle('open');
         btn.innerHTML = content.classList.contains('open') ? "▲ Hide Aspects" : "▼ Show Aspects";
+        autoSizeAllTextareas();
     }
 
     function toggleCardCollapse(btn) {
@@ -605,6 +632,7 @@
             </div>
         `;
         document.getElementById('player-column').appendChild(div);
+        autoSizeAllTextareas();
     }
 
     // --- DOM GENERATION: NPC ---
@@ -650,6 +678,7 @@
             </div>
         `;
         document.getElementById('npc-column').appendChild(div);
+        autoSizeAllTextareas();
     }
 
     // --- NPC SKILLS HELPERS ---
@@ -849,6 +878,8 @@
                     card.querySelector('.npc-notes').value = n.notes || "";
                     card.querySelector('.npc-send-aspects').checked = n.sendAspects || false;
                 });
+
+                autoSizeAllTextareas();
             } catch(err) {
                 console.error(err);
                 alert("Error loading scene.");
@@ -1003,6 +1034,8 @@
         if (data.consequences) {
             card.querySelector('.pc-notes').value = data.consequences;
         }
+
+        autoSizeAllTextareas();
     }
 
     function importNPCFromData(data) {
@@ -1074,6 +1107,8 @@
             }
         }
         card.querySelector('.npc-notes').value = notes.trim();
+
+        autoSizeAllTextareas();
     }
 
     // --- FATE ROLL CORE ---
