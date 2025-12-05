@@ -96,6 +96,22 @@
         }
         .tiny-btn:hover { background: #b2bec3; color: white; }
 
+        /* Collapse button & collapsed cards */
+        .collapse-btn {
+            background: #dfe6e9;
+            color: #636e72;
+        }
+        .collapse-btn:hover {
+            background: #b2bec3;
+            color: white;
+        }
+        .entity-card.collapsed .card-body {
+            display: none;
+        }
+        .entity-card.collapsed {
+            padding-bottom: 8px;
+        }
+
         /* --- TURN CHECKBOX --- */
         .turn-toggle {
             width: 24px;
@@ -316,6 +332,39 @@
             margin-bottom: 4px;
         }
 
+        /* NPC skills block */
+        .npc-skill-block {
+            background: #f9f9f9;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .npc-skill-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-bottom: 4px;
+        }
+        .npc-skill-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8em;
+        }
+        .npc-skill-name {
+            flex: 1;
+        }
+        .npc-skill-bonus {
+            width: 40px;
+            text-align: right;
+            font-weight: bold;
+        }
+        .npc-skill-add-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
         @media (max-width: 1100px) {
             .container { grid-template-columns: 1fr; }
             .scene-card { order: -1; }
@@ -348,7 +397,11 @@
     <div>
         <div class="column-header header-players">
             <span>🦸 Players</span>
-            <button class="btn btn-primary mini-btn" style="background:rgba(0,0,0,0.3);" onclick="addPlayer()">+ Add</button>
+            <div style="display:flex; gap:6px;">
+                <button class="btn btn-primary mini-btn" style="background:rgba(0,0,0,0.3);" onclick="addPlayer()">+ Add</button>
+                <button class="btn btn-accent mini-btn" style="background:rgba(0,0,0,0.3);" onclick="document.getElementById('pcImportInput').click()">⭳ Import</button>
+                <input type="file" id="pcImportInput" accept="application/json" multiple style="display:none" onchange="importPCFiles(this)">
+            </div>
         </div>
         <div class="card-column" id="player-column"></div>
     </div>
@@ -393,7 +446,11 @@
     <div>
         <div class="column-header header-npcs">
             <span>💀 Opposition</span>
-            <button class="btn btn-primary mini-btn" style="background:rgba(0,0,0,0.3);" onclick="addNPC()">+ Add</button>
+            <div style="display:flex; gap:6px;">
+                <button class="btn btn-primary mini-btn" style="background:rgba(0,0,0,0.3);" onclick="addNPC()">+ Add</button>
+                <button class="btn btn-accent mini-btn" style="background:rgba(0,0,0,0.3);" onclick="document.getElementById('npcImportInput').click()">⭳ Import</button>
+                <input type="file" id="npcImportInput" accept="application/json" multiple style="display:none" onchange="importNPCFiles(this)">
+            </div>
         </div>
         <div class="card-column" id="npc-column"></div>
     </div>
@@ -461,6 +518,13 @@
         btn.innerHTML = content.classList.contains('open') ? "▲ Hide Aspects" : "▼ Show Aspects";
     }
 
+    function toggleCardCollapse(btn) {
+        const card = btn.closest('.entity-card');
+        if (!card) return;
+        const collapsed = card.classList.toggle('collapsed');
+        btn.textContent = collapsed ? '▸' : '▾';
+    }
+
     // --- STRESS BOX LOGIC ---
     function createStressHTML(cssClass, count) {
         let boxes = '';
@@ -500,35 +564,37 @@
                 <div class="turn-toggle" onclick="this.classList.toggle('active')" title="Popcorn Initiative: Click to take turn"></div>
                 <input type="text" class="pc-name" placeholder="Character Name" value="${name}" style="font-weight:bold;">
                 <input type="number" class="pc-fp" value="3" min="0" title="Fate Points" style="width: 50px; text-align:center; border-color:var(--gold); font-weight:bold;">
+                <button class="tiny-btn collapse-btn" onclick="toggleCardCollapse(this)" title="Collapse / Expand">▾</button>
             </div>
-            
-            <div class="stress-row pc-phys">
-                <span class="card-label">Phys</span>
-                ${createStressHTML('pc-phys', 4)}
-            </div>
-            <div class="stress-row pc-ment">
-                <span class="card-label">Ment</span>
-                ${createStressHTML('pc-ment', 4)}
-            </div>
-            <div class="stress-row pc-powr">
-                <span class="card-label" style="color:#8e44ad;">Power</span>
-                ${createStressHTML('pc-powr', 3)}
-            </div>
+            <div class="card-body">
+                <div class="stress-row pc-phys">
+                    <span class="card-label">Phys</span>
+                    ${createStressHTML('pc-phys', 4)}
+                </div>
+                <div class="stress-row pc-ment">
+                    <span class="card-label">Ment</span>
+                    ${createStressHTML('pc-ment', 4)}
+                </div>
+                <div class="stress-row pc-powr">
+                    <span class="card-label" style="color:#8e44ad;">Power</span>
+                    ${createStressHTML('pc-powr', 3)}
+                </div>
 
-            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; background:#f9f9f9; padding:5px; border-radius:4px;">
-                <label style="font-size:0.75em; cursor:pointer;"><input type="checkbox" class="cond-winded"> Winded</label>
-                <label style="font-size:0.75em; cursor:pointer;"><input type="checkbox" class="cond-burned"> Burned</label>
-                <label style="font-size:0.75em; cursor:pointer;"><input type="checkbox" class="cond-scarred"> Scarred</label>
-            </div>
-            
-            <span class="section-label">Consequences / Notes</span>
-            <textarea class="pc-notes" rows="1" placeholder="Mild: ..."></textarea>
+                <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; background:#f9f9f9; padding:5px; border-radius:4px;">
+                    <label style="font-size:0.75em; cursor:pointer;"><input type="checkbox" class="cond-winded"> Winded</label>
+                    <label style="font-size:0.75em; cursor:pointer;"><input type="checkbox" class="cond-burned"> Burned</label>
+                    <label style="font-size:0.75em; cursor:pointer;"><input type="checkbox" class="cond-scarred"> Scarred</label>
+                </div>
+                
+                <span class="section-label">Consequences / Notes</span>
+                <textarea class="pc-notes" rows="1" placeholder="Mild: ..."></textarea>
 
-            <button class="toggle-aspect-btn" onclick="toggleAspects(this)">▼ Show Aspects</button>
-            <div class="collapsible-aspects">
-                <label class="send-chk-label"><input type="checkbox" class="pc-send-aspects"> Include in Discord</label>
-                <input type="text" class="pc-hc" placeholder="High Concept" style="font-weight:bold; margin-bottom:5px;">
-                <textarea class="pc-other-aspects" rows="3" placeholder="Trouble: ...&#10;Other Aspect: ..."></textarea>
+                <button class="toggle-aspect-btn" onclick="toggleAspects(this)">▼ Show Aspects</button>
+                <div class="collapsible-aspects">
+                    <label class="send-chk-label"><input type="checkbox" class="pc-send-aspects"> Include in Discord</label>
+                    <input type="text" class="pc-hc" placeholder="High Concept" style="font-weight:bold; margin-bottom:5px;">
+                    <textarea class="pc-other-aspects" rows="3" placeholder="Trouble: ...&#10;Other Aspect: ..."></textarea>
+                </div>
             </div>
         `;
         document.getElementById('player-column').appendChild(div);
@@ -543,27 +609,126 @@
             <div class="card-row">
                 <div class="turn-toggle" onclick="this.classList.toggle('active')" title="Popcorn Initiative: Click to take turn"></div>
                 <input type="text" class="npc-name" placeholder="NPC Name" value="${name}" style="font-weight:bold;">
+                <button class="tiny-btn collapse-btn" onclick="toggleCardCollapse(this)" title="Collapse / Expand">▾</button>
             </div>
-            <input type="text" class="npc-aspect" placeholder="High Concept / Role" style="font-size:0.9em; margin-bottom:5px; font-style:italic;">
-            
-            <span class="section-label">Stress</span>
-            <div class="stress-row npc-phys">
-                <span class="card-label">Phys</span>
-                ${createStressHTML('npc-phys', 2)}
-            </div>
-            <div class="stress-row npc-ment">
-                <span class="card-label">Ment</span>
-                ${createStressHTML('npc-ment', 2)}
-            </div>
+            <div class="card-body">
+                <input type="text" class="npc-aspect" placeholder="High Concept / Role" style="font-size:0.9em; margin-bottom:5px; font-style:italic;">
+                
+                <span class="section-label">Stress</span>
+                <div class="stress-row npc-phys">
+                    <span class="card-label">Phys</span>
+                    ${createStressHTML('npc-phys', 2)}
+                </div>
+                <div class="stress-row npc-ment">
+                    <span class="card-label">Ment</span>
+                    ${createStressHTML('npc-ment', 2)}
+                </div>
 
-            <span class="section-label">Skills & Stunts</span>
-            <textarea class="npc-skills" rows="3" placeholder="Good (+3) Fight&#10;Fair (+2) Stealth&#10;Stunt: +2 Defense vs Range"></textarea>
+                <span class="section-label">Skills</span>
+                <div class="npc-skill-block">
+                    <div class="npc-skill-list"></div>
+                    <div class="npc-skill-add-row">
+                        <input type="text" class="npc-skill-name-input" placeholder="Skill">
+                        <input type="number" class="npc-skill-bonus-input" value="0" style="width: 60px;">
+                        <button class="tiny-btn" onclick="addNpcSkill(this)">+</button>
+                    </div>
+                </div>
 
-            <label class="send-chk-label" style="margin-top:10px;"><input type="checkbox" class="npc-send-aspects"> Include in Discord</label>
-            <span class="section-label" style="margin-top:0;">Aspects & Consequences</span>
-            <textarea class="npc-notes" rows="2" placeholder="Trouble..."></textarea>
+                <span class="section-label">Stunts / Notes</span>
+                <textarea class="npc-stunts" rows="3" placeholder="Stunts, tricks, etc."></textarea>
+
+                <label class="send-chk-label" style="margin-top:10px;"><input type="checkbox" class="npc-send-aspects"> Include in Discord</label>
+                <span class="section-label" style="margin-top:0;">Aspects & Consequences</span>
+                <textarea class="npc-notes" rows="2" placeholder="Trouble..."></textarea>
+            </div>
         `;
         document.getElementById('npc-column').appendChild(div);
+    }
+
+    // --- NPC SKILLS HELPERS ---
+    function addNpcSkill(btn) {
+        const block = btn.closest('.npc-skill-block');
+        if (!block) return;
+        const nameInput = block.querySelector('.npc-skill-name-input');
+        const bonusInput = block.querySelector('.npc-skill-bonus-input');
+        if (!nameInput) return;
+
+        const name = (nameInput.value || '').trim();
+        if (!name) return;
+
+        let bonus = parseInt(bonusInput.value) || 0;
+        const bonusText = bonus >= 0 ? `+${bonus}` : String(bonus);
+
+        const list = block.querySelector('.npc-skill-list');
+        const row = document.createElement('div');
+        row.className = 'npc-skill-row';
+        row.innerHTML = `
+            <span class="npc-skill-name">${name}</span>
+            <span class="npc-skill-bonus">${bonusText}</span>
+            <button class="tiny-btn" onclick="rollNpcSkill(this)">🎲</button>
+            <button class="tiny-btn" onclick="removeNpcSkill(this)">×</button>
+        `;
+        list.appendChild(row);
+
+        nameInput.value = '';
+        bonusInput.value = 0;
+    }
+
+    function removeNpcSkill(btn) {
+        const row = btn.closest('.npc-skill-row');
+        if (row) row.remove();
+    }
+
+    function getNpcSkills(card) {
+        const rows = card.querySelectorAll('.npc-skill-row');
+        const result = [];
+        rows.forEach(row => {
+            const nameEl = row.querySelector('.npc-skill-name');
+            const bonusEl = row.querySelector('.npc-skill-bonus');
+            if (!nameEl || !bonusEl) return;
+            const name = nameEl.innerText.trim();
+            if (!name) return;
+            const raw = bonusEl.innerText.trim();
+            const bonus = parseInt(raw.replace('+','')) || 0;
+            result.push({ name, bonus });
+        });
+        return result;
+    }
+
+    function restoreNpcSkills(card, skills) {
+        const list = card.querySelector('.npc-skill-list');
+        if (!list || !Array.isArray(skills)) return;
+        list.innerHTML = '';
+        skills.forEach(s => {
+            if (!s || !s.name) return;
+            const row = document.createElement('div');
+            row.className = 'npc-skill-row';
+            const bonus = typeof s.bonus === 'number'
+                ? s.bonus
+                : parseInt(String(s.bonus).replace('+','')) || 0;
+            const bonusText = bonus >= 0 ? `+${bonus}` : String(bonus);
+            row.innerHTML = `
+                <span class="npc-skill-name">${s.name}</span>
+                <span class="npc-skill-bonus">${bonusText}</span>
+                <button class="tiny-btn" onclick="rollNpcSkill(this)">🎲</button>
+                <button class="tiny-btn" onclick="removeNpcSkill(this)">×</button>
+            `;
+            list.appendChild(row);
+        });
+    }
+
+    function summarizeNpcSkills(card) {
+        const rows = card.querySelectorAll('.npc-skill-row');
+        if (!rows.length) return "";
+        const parts = [];
+        rows.forEach((row, idx) => {
+            if (idx >= 4) return; // keep it short in Discord
+            const name = row.querySelector('.npc-skill-name')?.innerText.trim() || "";
+            const bonus = row.querySelector('.npc-skill-bonus')?.innerText.trim() || "";
+            if (!name) return;
+            parts.push(`${name} ${bonus}`);
+        });
+        return parts.join(", ");
     }
 
     // --- SAVE / LOAD ---
@@ -606,7 +771,8 @@
                 aspect: card.querySelector('.npc-aspect').value,
                 phys: getStressData(card.querySelector('.npc-phys')),
                 ment: getStressData(card.querySelector('.npc-ment')),
-                skills: card.querySelector('.npc-skills').value,
+                skills: getNpcSkills(card),
+                stunts: card.querySelector('.npc-stunts').value,
                 notes: card.querySelector('.npc-notes').value,
                 sendAspects: card.querySelector('.npc-send-aspects').checked
             });
@@ -641,7 +807,7 @@
 
                 const pCol = document.getElementById('player-column');
                 pCol.innerHTML = "";
-                data.players.forEach(p => {
+                (data.players || []).forEach(p => {
                     addPlayer(p.name);
                     const card = pCol.lastElementChild;
                     if(p.turn) card.querySelector('.turn-toggle').classList.add('active');
@@ -649,10 +815,10 @@
                     restoreStressTrack(card.querySelector('.pc-phys'), p.phys);
                     restoreStressTrack(card.querySelector('.pc-ment'), p.ment);
                     restoreStressTrack(card.querySelector('.pc-powr'), p.power);
-                    card.querySelector('.cond-winded').checked = p.cond.w;
-                    card.querySelector('.cond-burned').checked = p.cond.b;
-                    card.querySelector('.cond-scarred').checked = p.cond.s;
-                    card.querySelector('.pc-notes').value = p.notes;
+                    card.querySelector('.cond-winded').checked = p.cond?.w || false;
+                    card.querySelector('.cond-burned').checked = p.cond?.b || false;
+                    card.querySelector('.cond-scarred').checked = p.cond?.s || false;
+                    card.querySelector('.pc-notes').value = p.notes || "";
                     card.querySelector('.pc-hc').value = p.hc || "";
                     card.querySelector('.pc-other-aspects').value = p.aspects || "";
                     card.querySelector('.pc-send-aspects').checked = p.sendAspects || false;
@@ -660,15 +826,23 @@
 
                 const nCol = document.getElementById('npc-column');
                 nCol.innerHTML = "";
-                data.npcs.forEach(n => {
+                (data.npcs || []).forEach(n => {
                     addNPC(n.name);
                     const card = nCol.lastElementChild;
                     if(n.turn) card.querySelector('.turn-toggle').classList.add('active');
-                    card.querySelector('.npc-aspect').value = n.aspect;
-                    card.querySelector('.npc-skills').value = n.skills || "";
-                    card.querySelector('.npc-notes').value = n.notes;
+                    card.querySelector('.npc-aspect').value = n.aspect || "";
                     restoreStressTrack(card.querySelector('.npc-phys'), n.phys);
                     restoreStressTrack(card.querySelector('.npc-ment'), n.ment);
+                    if (Array.isArray(n.skills)) {
+                        restoreNpcSkills(card, n.skills);
+                    } else if (typeof n.skills === 'string') {
+                        // backwards compatibility: old saves put skills text here
+                        card.querySelector('.npc-stunts').value = n.skills;
+                    }
+                    if (n.stunts) {
+                        card.querySelector('.npc-stunts').value = n.stunts;
+                    }
+                    card.querySelector('.npc-notes').value = n.notes || "";
                     card.querySelector('.npc-send-aspects').checked = n.sendAspects || false;
                 });
             } catch(err) {
@@ -698,7 +872,7 @@
             newBox.className = 'stress-box';
             newBox.innerText = i;
             newBox.onclick = function() { this.classList.toggle('active'); };
-            if(data.active.includes(i-1)) newBox.classList.add('active');
+            if(data.active && data.active.includes(i-1)) newBox.classList.add('active');
             container.appendChild(newBox);
         }
     }
@@ -719,6 +893,259 @@
         }
     }
 
+    // --- IMPORT FROM CHARACTER JSON ---
+    function importPCFiles(input) {
+        const files = input.files;
+        if (!files || !files.length) return;
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    importPCFromData(data);
+                } catch (err) {
+                    console.error(err);
+                    alert("Error reading character file: " + file.name);
+                }
+            };
+            reader.readAsText(file);
+        });
+        input.value = "";
+    }
+
+    function importNPCFiles(input) {
+        const files = input.files;
+        if (!files || !files.length) return;
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    importNPCFromData(data);
+                } catch (err) {
+                    console.error(err);
+                    alert("Error reading NPC file: " + file.name);
+                }
+            };
+            reader.readAsText(file);
+        });
+        input.value = "";
+    }
+
+    function importPCFromData(data) {
+        if (!data || !data.meta) return;
+        const name = data.meta.name || "";
+        addPlayer(name);
+        const pCol = document.getElementById('player-column');
+        const card = pCol.lastElementChild;
+
+        // Fate points
+        const fp = parseInt(data.meta.fatePoints) || 3;
+        card.querySelector('.pc-fp').value = fp;
+
+        // Health tracks (assume health[0] = Phys, health[1] = Ment)
+        if (Array.isArray(data.health)) {
+            if (data.health[0]) {
+                const t = data.health[0];
+                const total = parseInt(t.count) || (Array.isArray(t.active) ? t.active.length : 3);
+                const active = [];
+                (t.active || []).forEach((v, idx) => { if (v) active.push(idx); });
+                restoreStressTrack(card.querySelector('.pc-phys'), { total, active });
+            }
+            if (data.health[1]) {
+                const t = data.health[1];
+                const total = parseInt(t.count) || (Array.isArray(t.active) ? t.active.length : 3);
+                const active = [];
+                (t.active || []).forEach((v, idx) => { if (v) active.push(idx); });
+                restoreStressTrack(card.querySelector('.pc-ment'), { total, active });
+            }
+        }
+
+        // Power track
+        if (data.power && data.power.track) {
+            const t = data.power.track;
+            const total = parseInt(t.count) || (Array.isArray(t.active) ? t.active.length : 3);
+            const active = [];
+            (t.active || []).forEach((v, idx) => { if (v) active.push(idx); });
+            restoreStressTrack(card.querySelector('.pc-powr'), { total, active });
+        }
+
+        // Conditions from power.conditions
+        if (data.power && Array.isArray(data.power.conditions)) {
+            const conds = data.power.conditions;
+            if (conds[0]) card.querySelector('.cond-winded').checked = !!conds[0].checked;
+            if (conds[1]) card.querySelector('.cond-burned').checked = !!conds[1].checked;
+            if (conds[2]) card.querySelector('.cond-scarred').checked = !!conds[2].checked;
+        }
+
+        // High Concept
+        if (data.header && data.header.concept) {
+            card.querySelector('.pc-hc').value = data.header.concept;
+        }
+
+        // Aspects (Trouble + others)
+        let aspectText = "";
+        if (data.aspects) {
+            if (data.aspects.trouble) {
+                aspectText += `Trouble: ${data.aspects.trouble}\n`;
+            }
+            if (Array.isArray(data.aspects.others)) {
+                data.aspects.others.forEach(a => {
+                    if (a) aspectText += `${a}\n`;
+                });
+            }
+        }
+        if (aspectText.trim()) {
+            card.querySelector('.pc-other-aspects').value = aspectText.trim();
+        }
+
+        // Consequences / notes
+        if (data.consequences) {
+            card.querySelector('.pc-notes').value = data.consequences;
+        }
+    }
+
+    function importNPCFromData(data) {
+        if (!data || !data.meta) return;
+        const name = data.meta.name || "";
+        addNPC(name);
+        const nCol = document.getElementById('npc-column');
+        const card = nCol.lastElementChild;
+
+        // Aspect / role from header.concept
+        if (data.header && data.header.concept) {
+            card.querySelector('.npc-aspect').value = data.header.concept;
+        }
+
+        // Health tracks (same assumption as PCs)
+        if (Array.isArray(data.health)) {
+            if (data.health[0]) {
+                const t = data.health[0];
+                const total = parseInt(t.count) || (Array.isArray(t.active) ? t.active.length : 2);
+                const active = [];
+                (t.active || []).forEach((v, idx) => { if (v) active.push(idx); });
+                restoreStressTrack(card.querySelector('.npc-phys'), { total, active });
+            }
+            if (data.health[1]) {
+                const t = data.health[1];
+                const total = parseInt(t.count) || (Array.isArray(t.active) ? t.active.length : 2);
+                const active = [];
+                (t.active || []).forEach((v, idx) => { if (v) active.push(idx); });
+                restoreStressTrack(card.querySelector('.npc-ment'), { total, active });
+            }
+        }
+
+        // Skills from grouped skill pyramid
+        if (Array.isArray(data.skills)) {
+            const parsedSkills = [];
+            data.skills.forEach(entry => {
+                if (!entry) return;
+                const bonusStr = (entry.bonus || "0").toString().trim();
+                const bonus = parseInt(bonusStr.replace('+','')) || 0;
+                if (Array.isArray(entry.skills)) {
+                    entry.skills.forEach(skillName => {
+                        const sName = (skillName || "").trim();
+                        if (!sName) return;
+                        parsedSkills.push({ name: sName, bonus });
+                    });
+                }
+            });
+            restoreNpcSkills(card, parsedSkills);
+        }
+
+        // Stunts into stunts textarea
+        if (Array.isArray(data.stunts)) {
+            const lines = [];
+            data.stunts.forEach(s => {
+                if (!s) return;
+                const n = (s.name || "").trim();
+                const d = (s.desc || "").trim();
+                if (!n && !d) return;
+                lines.push(`${n} ${d}`.trim());
+            });
+            card.querySelector('.npc-stunts').value = lines.join('\n');
+        }
+
+        // Aspects & consequences into npc-notes
+        let notes = "";
+        if (data.aspects) {
+            if (data.aspects.trouble) {
+                notes += `Trouble: ${data.aspects.trouble}\n`;
+            }
+            if (Array.isArray(data.aspects.others)) {
+                data.aspects.others.forEach(a => {
+                    if (a) notes += `${a}\n`;
+                });
+            }
+        }
+        card.querySelector('.npc-notes').value = notes.trim();
+    }
+
+    // --- FATE ROLL CORE ---
+    function computeFateRoll(bonus) {
+        let total = 0, symbols = "";
+        for(let i=0; i<4; i++) {
+            let r = Math.floor(Math.random()*3)-1;
+            total += r;
+            symbols += (r===-1 ? "➖" : (r===0 ? "⬜" : "➕"));
+        }
+        const final = total + bonus;
+        const ladder = {
+            "-2": "Terrible", "-1": "Poor", "0": "Mediocre",
+            "1": "Average", "2": "Fair", "3": "Good",
+            "4": "Great", "5": "Superb", "6": "Fantastic",
+            "7": "Epic", "8": "Legendary"
+        };
+        const adj = ladder[final] || (final > 8 ? "Godlike" : "Abysmal");
+        return { total, final, symbols, adj };
+    }
+
+    function rollDice() {
+        const reason = document.getElementById('rollReason').value;
+        const bonus = parseInt(document.getElementById('rollBonus').value) || 0;
+
+        const { total, final, symbols, adj } = computeFateRoll(bonus);
+
+        // Show dice symbols on the dashboard as well
+        document.getElementById('rollResult').innerText = `Dice: ${symbols}  ➜  Total: ${final} (${adj})`;
+
+        const payload = {
+            username: "Game Master",
+            embeds: [{
+                title: reason ? `🎲 Rolling: ${reason}` : "🎲 GM Roll",
+                description: `**Dice:** ${symbols} (${total > 0 ? '+'+total : total})\n**Bonus:** ${bonus}\n**Total:** __**${final}**__ (${adj})`,
+                color: 9807270
+            }]
+        };
+        sendToDiscord(payload);
+    }
+
+    function rollNpcSkill(btn) {
+        const row = btn.closest('.npc-skill-row');
+        const card = btn.closest('.entity-card');
+        if (!row || !card) return;
+
+        const npcName = card.querySelector('.npc-name')?.value || "Enemy";
+        const skillName = row.querySelector('.npc-skill-name')?.innerText.trim() || "Skill";
+        const bonusText = row.querySelector('.npc-skill-bonus')?.innerText.trim() || "+0";
+        const bonus = parseInt(bonusText.replace('+','')) || 0;
+
+        const { total, final, symbols, adj } = computeFateRoll(bonus);
+
+        document.getElementById('rollResult').innerText = `Dice: ${symbols}  ➜  Total: ${final} (${adj})`;
+
+        const payload = {
+            username: "Game Master",
+            embeds: [{
+                title: `🎲 ${npcName} rolls ${skillName}`,
+                description: `**Skill:** ${skillName} (${bonus >= 0 ? '+'+bonus : bonus})\n**Dice:** ${symbols} (${total > 0 ? '+'+total : total})\n**Total:** __**${final}**__ (${adj})`,
+                color: 9807270
+            }]
+        };
+        sendToDiscord(payload);
+    }
+
+    // --- DASHBOARD TO DISCORD ---
     function sendFullDashboard() {
         const sceneName = document.getElementById('sceneName').value || "Current Scene";
         const sceneImg = document.getElementById('sceneImgUrl').value;
@@ -774,8 +1201,8 @@
             const mA = c.querySelectorAll('.npc-ment .active').length;
             const mT = c.querySelectorAll('.npc-ment .stress-box').length;
             
-            const skills = c.querySelector('.npc-skills').value;
-            
+            const stuntsText = c.querySelector('.npc-stunts').value;
+
             // Aspects/Notes (If Checked)
             let aspTxt = "";
             if(c.querySelector('.npc-send-aspects').checked) {
@@ -783,10 +1210,13 @@
                 if(notes) aspTxt += `> ${notes.replace(/\n/g, '\n> ')}\n`;
             }
 
+            const skillSummary = summarizeNpcSkills(c);
+
             nList += `${turn} **${n}**\n`;
             if (aspect) nList += `└ _${aspect}_\n`;
             nList += `└ P:${pA}/${pT} | M:${mA}/${mT}\n`;
-            if(skills) nList += `⚔️ *${skills.split('\n')[0]}...*\n`;
+            if(skillSummary) nList += `⚔️ ${skillSummary}\n`;
+            if(stuntsText) nList += `🧨 *${stuntsText.split('\n')[0]}...*\n`;
             if(aspTxt) nList += aspTxt;
             nList += "\n";
         });
@@ -803,38 +1233,6 @@
                     { name: "🦸 Heroes", value: pList || "None", inline: true },
                     { name: "💀 Opposition", value: nList || "None", inline: true }
                 ]
-            }]
-        };
-        sendToDiscord(payload);
-    }
-
-    function rollDice() {
-        const reason = document.getElementById('rollReason').value;
-        const bonus = parseInt(document.getElementById('rollBonus').value) || 0;
-        let total = 0, symbols = "";
-        for(let i=0; i<4; i++) {
-            let r = Math.floor(Math.random()*3)-1;
-            total += r;
-            symbols += (r===-1?"➖":(r===0?"⬜":"➕"));
-        }
-        const final = total + bonus;
-        let ladder = {
-            "-2": "Terrible", "-1": "Poor", "0": "Mediocre",
-            "1": "Average", "2": "Fair", "3": "Good",
-            "4": "Great", "5": "Superb", "6": "Fantastic",
-            "7": "Epic", "8": "Legendary"
-        };
-        let adj = ladder[final] || (final>8 ? "Godlike" : "Abysmal");
-
-        // Show dice symbols on the dashboard as well
-        document.getElementById('rollResult').innerText = `Dice: ${symbols}  ➜  Total: ${final} (${adj})`;
-
-        const payload = {
-            username: "Game Master",
-            embeds: [{
-                title: reason ? `🎲 Rolling: ${reason}` : "🎲 GM Roll",
-                description: `**Dice:** ${symbols} (${total > 0 ? '+'+total : total})\n**Bonus:** ${bonus}\n**Total:** __**${final}**__ (${adj})`,
-                color: 9807270
             }]
         };
         sendToDiscord(payload);
