@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fate GM Command Center (Active Aspect Board + Sheet Aspects + HD Image)</title>
+  <style>
+    :root{
+      --bg0:#0f1116;
+      --bg1:#141925;
+      --card:#171d2b;
+      --stroke: rgba(255,255,255,0.10);
+
+      --text:#eef1ff;
+      --muted:#b9c0da;
+      --muted2:#8d97bb;
+
+      --blue:#5aa7ff;
+      --red:#ff5c5c;
+      --gold:#ffcc66;
+      --green:#31d19f;
+      --purple:#b07dff;
+
+      --shadow: 0 14px 35px rgba(0,0,0,0.45);
+      --radius: 14px;
+
+      --input: rgba(255,255,255,0.06);
+      --inputFocus: rgba(255,255,255,0.10);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 800px at 25% 10%, rgba(90,167,255,0.12), transparent 60%),
+        radial-gradient(900px 700px at 80% 25%, rgba(176,125,255,0.12), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      color: var(--text);
+      padding: 16px;
+    }
+
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(15,17,22,0.72);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    .toprow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .spacer{ flex:1; }
+
+    .btn{
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 800;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      transition: transform 0.12s ease, filter 0.12s ease, border-color 0.12s ease;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.05); border-color: rgba(90,167,255,0.35); }
+    .btn:active{ transform: translateY(0px); filter: brightness(0.98); }
+    .btn-blue{ background: rgba(90,167,255,0.16); border-color: rgba(90,167,255,0.30); }
+    .btn-green{ background: rgba(49,209,159,0.16); border-color: rgba(49,209,159,0.30); }
+    .btn-red{ background: rgba(255,92,92,0.16); border-color: rgba(255,92,92,0.30); }
+    .btn-purple{ background: rgba(176,125,255,0.16); border-color: rgba(176,125,255,0.30); }
+    .mini{ padding: 8px 10px; border-radius: 10px; font-weight: 850; }
+
+    .iconbtn{
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: 0.12s ease;
+    }
+    .iconbtn:hover{ border-color: rgba(90,167,255,0.35); transform: translateY(-1px); }
+
+    textarea, select, input[type="number"], input[type="text"]{
+      width:100%;
+      color: var(--text);
+      background: var(--input);
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      padding: 10px 12px;
+      outline: none;
+      transition: 0.12s ease;
+      font: inherit;
+    }
+    input[type="number"]{ -moz-appearance: textfield; }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance: none; margin:0; }
+
+    textarea{
+      resize:none;
+      overflow:hidden; /* no internal scrollbars */
+      min-height: 42px;
+      line-height: 1.35;
+    }
+
+    textarea:focus, select:focus, input:focus{
+      background: var(--inputFocus);
+      border-color: rgba(90,167,255,0.55);
+      box-shadow: 0 0 0 3px rgba(90,167,255,0.15);
+    }
+    ::placeholder{ color: rgba(238,241,255,0.40); }
+
+    .webhook{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex: 1 1 460px;
+      min-width: 260px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.04);
+    }
+    .webhook label{
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .hint{
+      color: var(--muted2);
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+
+    .grid{
+      max-width: 1680px;
+      margin: 0 auto;
+      display:grid;
+      grid-template-columns: 380px 1fr 380px;
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 1200px){
+      .grid{ grid-template-columns: 1fr; }
+      .topbar{ position: static; }
+    }
+
+    .card{
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .cardhead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.02);
+    }
+    .cardhead h3{
+      margin:0;
+      font-size: 1rem;
+      letter-spacing: 0.2px;
+      display:flex;
+      align-items:center;
+      gap: 8px;
+    }
+    .cardbody{ padding: 14px; }
+
+    .colhead{
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.03);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      margin-bottom: 12px;
+    }
+    .coltitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px 14px;
+      font-weight: 950;
+      letter-spacing: 0.4px;
+    }
+    .coltitle .right{ display:flex; gap: 8px; align-items:center; }
+    .players{ border-color: rgba(90,167,255,0.30); }
+    .players .coltitle{ background: rgba(90,167,255,0.14); }
+    .npcs{ border-color: rgba(255,92,92,0.30); }
+    .npcs .coltitle{ background: rgba(255,92,92,0.14); }
+
+    .stack{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(255,255,255,0.02);
+      border: 1px dashed rgba(255,255,255,0.10);
+      border-radius: var(--radius);
+      min-height: 240px;
+    }
+
+    .entity{
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.03);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+      overflow:hidden;
+    }
+    .entity.pc{ border-left: 5px solid rgba(90,167,255,0.85); }
+    .entity.npc{ border-left: 5px solid rgba(255,92,92,0.85); }
+
+    .entityhead{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.02);
+    }
+
+    /* TURN LOGIC (popcorn initiative) */
+    .turn{
+      width: 26px; height: 26px;
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.12);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+      color: transparent;
+      user-select:none;
+      flex-shrink: 0;
+      transition: 0.12s ease;
+    }
+    .turn:hover{ border-color: rgba(255,255,255,0.30); }
+    .turn.active{
+      background: rgba(49,209,159,0.95);
+      border-color: rgba(49,209,159,0.95);
+      color: #081014;
+    }
+    .turn::after{ content:"✓"; }
+
+    .entityname{ font-weight: 950; }
+    .fp{
+      width: 54px;
+      text-align:center;
+      border-color: rgba(255,204,102,0.35) !important;
+      background: rgba(255,204,102,0.10) !important;
+      font-weight: 950;
+    }
+
+    .chiprow{
+      display:flex;
+      gap: 8px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-weight: 850;
+      font-size: 0.85rem;
+      cursor: default;
+    }
+    .tag .x{
+      width: 22px; height: 22px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+      line-height: 1;
+    }
+    .tag .x:hover{ border-color: rgba(255,92,92,0.45); background: rgba(255,92,92,0.12); }
+
+    .collapse{
+      margin-left:auto;
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+    }
+    .collapse:hover{ border-color: rgba(90,167,255,0.35); }
+
+    .trash{
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,92,92,0.35);
+      background: rgba(255,92,92,0.12);
+      color: var(--text);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+    }
+    .trash:hover{ filter: brightness(1.05); }
+
+    .entitybody{ padding: 12px; }
+    .entitybody.hidden{ display:none; }
+
+    .row{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .row > *{ flex: 1; }
+    .row.tight > *{ flex: initial; }
+
+    .label{
+      color: var(--muted2);
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .track{
+      display:grid;
+      grid-template-columns: 56px 1fr auto auto;
+      gap: 8px;
+      align-items:center;
+      margin-top: 8px;
+    }
+    .boxes{ display:flex; gap: 6px; flex-wrap:wrap; }
+    .box{
+      width: 26px; height: 26px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.04);
+      color: rgba(238,241,255,0.65);
+      cursor:pointer;
+      user-select:none;
+      font-weight: 950;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: 0.10s ease;
+    }
+    .box:hover{ border-color: rgba(255,255,255,0.28); }
+    .box.on{ color: #0c1116; }
+    .box.phys.on{ background: rgba(255,92,92,0.95); border-color: rgba(255,92,92,0.95); }
+    .box.ment.on{ background: rgba(90,167,255,0.95); border-color: rgba(90,167,255,0.95); }
+    .box.powr.on{ background: rgba(176,125,255,0.95); border-color: rgba(176,125,255,0.95); }
+
+    .tiny{
+      width: 34px; height: 34px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      cursor:pointer;
+      font-weight: 1000;
+    }
+    .tiny:hover{ border-color: rgba(90,167,255,0.35); }
+
+    .subcard{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.02);
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .sceneimg{
+      width:100%;
+      height: 280px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.10);
+      overflow:hidden;
+      background: rgba(0,0,0,0.25);
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.55);
+    }
+    .sceneimg img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    /* Board */
+    .aspectboard{ display:flex; flex-direction:column; gap: 10px; }
+    .aspectform{
+      display:grid;
+      grid-template-columns: 220px 1fr auto;
+      gap: 10px;
+      align-items:center;
+    }
+    @media (max-width: 720px){
+      .aspectform{ grid-template-columns: 1fr; }
+      .grid{ grid-template-columns: 1fr; }
+    }
+    .aspectlist{ display:flex; flex-direction:column; gap: 8px; }
+    .aspectrow{
+      display:grid;
+      grid-template-columns: 140px 1fr auto;
+      gap: 10px;
+      align-items:center;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+    }
+    @media (max-width: 720px){
+      .aspectrow{ grid-template-columns: 1fr; }
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      width: fit-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.04);
+      font-weight: 950;
+      color: var(--muted);
+    }
+    .badge.scene{ border-color: rgba(255,204,102,0.35); background: rgba(255,204,102,0.10); }
+    .badge.pc{ border-color: rgba(90,167,255,0.35); background: rgba(90,167,255,0.10); }
+    .badge.npc{ border-color: rgba(255,92,92,0.35); background: rgba(255,92,92,0.10); }
+
+    .righttools{
+      display:flex;
+      gap: 8px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    /* List rows */
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      margin-top: 8px;
+    }
+    .item{
+      display:flex;
+      gap: 8px;
+      align-items:flex-start;
+    }
+    .item textarea{ flex:1; }
+    .item .del{
+      width: 34px; height: 34px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,92,92,0.35);
+      background: rgba(255,92,92,0.12);
+      color: var(--text);
+      cursor:pointer;
+      font-weight: 1000;
+      flex-shrink:0;
+    }
+    .item .del:hover{ filter: brightness(1.05); }
+
+    /* Single-line aspect row list */
+    .ilist{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      margin-top: 8px;
+    }
+    .irow{
+      display:flex;
+      gap: 8px;
+      align-items:center;
+    }
+    .irow input{ flex:1; }
+    .irow .del{
+      width: 34px; height: 34px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,92,92,0.35);
+      background: rgba(255,92,92,0.12);
+      color: var(--text);
+      cursor:pointer;
+      font-weight: 1000;
+      flex-shrink:0;
+    }
+
+    /* Toast */
+    .toastwrap{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      z-index: 9999;
+      max-width: min(460px, calc(100vw - 28px));
+    }
+    .toast{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(23,29,43,0.92);
+      box-shadow: var(--shadow);
+      padding: 12px 12px;
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      backdrop-filter: blur(10px);
+      animation: pop 0.18s ease-out;
+    }
+    .toast .icon{ width: 22px; text-align:center; margin-top: 1px; }
+    .toast .msg{ flex:1; }
+    .toast .msg b{ display:block; margin-bottom: 2px; }
+    .toast .x{
+      width: 28px; height: 28px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      cursor:pointer;
+    }
+    @keyframes pop{ from{ transform: translateY(6px); opacity: 0; } to{ transform: translateY(0px); opacity: 1; } }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="toprow">
+      <input type="file" id="fileInput" style="display:none" accept="application/json" onchange="loadScene(this)" />
+      <button class="btn btn-blue" onclick="saveScene()">💾 Save</button>
+      <button class="btn btn-blue" onclick="document.getElementById('fileInput').click()">📂 Load</button>
+
+      <button class="btn btn-green" onclick="resetTurns()">🔄 Reset Turns</button>
+      <button class="btn btn-red" onclick="resetAllStatus()" title="Clear all stress + conditions">🧹 Reset Stress</button>
+
+      <div class="webhook">
+        <label for="webhookUrl">🔗 Webhook</label>
+        <input type="text" id="webhookUrl" placeholder="Discord Webhook URL..." onchange="saveWebhook()" />
+        <button class="iconbtn" onclick="testWebhook()" title="Test webhook">✅</button>
+      </div>
+
+      <div class="spacer"></div>
+
+      <input type="text" id="quickFind" placeholder="🔎 Quick find (filters PCs + NPCs by name)..." style="max-width: 420px" oninput="applyFilter()" />
+
+      <button class="btn btn-purple" onclick="sendFullDashboard()">🚀 Send Dashboard</button>
+    </div>
+    <div class="hint">
+      ✅ Turn logic is still here: click the round checkbox on any card to mark their turn (popcorn initiative). “Reset Turns” clears all.
+      <br>
+      Sheet aspects (HC/Trouble/others) live on each card. The middle board tracks only <b>active aspects during play</b> (scene + applied to PCs/NPCs).
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: PLAYERS -->
+    <div>
+      <div class="colhead players">
+        <div class="coltitle">
+          <span>🦸 Players</span>
+          <div class="right">
+            <button class="btn mini btn-blue" onclick="addPlayer()">+ Add</button>
+            <input type="file" id="pcImportInput" accept="application/json" multiple style="display:none" onchange="importPCFiles(this)" />
+            <button class="btn mini" onclick="document.getElementById('pcImportInput').click()">⭳ Import</button>
+          </div>
+        </div>
+      </div>
+      <div class="stack" id="player-column"></div>
+    </div>
+
+    <!-- CENTER -->
+    <div>
+      <!-- Scene -->
+      <div class="card">
+        <div class="cardhead">
+          <h3>📍 Scene</h3>
+          <div class="righttools">
+            <span class="label">GM FP</span>
+            <input type="number" id="gmFate" value="5" min="0" style="max-width: 90px; text-align:center; font-weight: 950;" />
+            <button class="tiny" onclick="modFate(1)">+</button>
+            <button class="tiny" onclick="modFate(-1)">−</button>
+          </div>
+        </div>
+        <div class="cardbody">
+          <input type="text" id="sceneName" placeholder="Scene Name (e.g. The Burning Building)" style="font-weight: 950; font-size: 1.05rem;" />
+
+          <div style="height:10px;"></div>
+
+          <div class="sceneimg">
+            <img id="sceneImg" src="https://placehold.co/1000x500/111827/ffffff?text=Scene+Art" alt="Scene art" />
+          </div>
+
+          <div style="height:10px;"></div>
+
+          <input type="file" id="sceneImgFile" accept="image/*" style="display:none" onchange="loadSceneImgFile(this)" />
+          <div class="row">
+            <input type="text" id="sceneImgUrl" placeholder="Paste Scene Image URL (or data:image... from upload)..." oninput="updateSceneImg()" />
+            <button class="btn mini" onclick="document.getElementById('sceneImgFile').click()" title="Load scene image from HD">🖼 Upload</button>
+            <button class="btn mini" onclick="clearSceneImg()" title="Clear scene image">🧽</button>
+            <button class="btn mini" onclick="copySceneUrl()" title="Copy scene image URL/data">📋</button>
+          </div>
+
+          <div class="hint">Upload uses a data URL so it saves/loads with your scene JSON. (Huge images will make your JSON large.)</div>
+        </div>
+      </div>
+
+      <!-- Aspect Board -->
+      <div class="card" style="margin-top: 14px;">
+        <div class="cardhead">
+          <h3>🌍 Active Aspect Board (Scene + Applied)</h3>
+          <div class="righttools">
+            <button class="btn mini" onclick="addSceneAspectFocus()">+ Scene Aspect</button>
+          </div>
+        </div>
+        <div class="cardbody aspectboard">
+          <div class="aspectform">
+            <select id="aspectTarget"></select>
+            <input type="text" id="aspectText" placeholder="Add an ACTIVE aspect (e.g. On Fire, Grappled, Blinded)..." />
+            <button class="btn btn-blue" onclick="addAspectFromForm()">➕ Add</button>
+          </div>
+
+          <div class="subcard">
+            <div class="row">
+              <div class="label">Quick view</div>
+              <select id="aspectFilter" onchange="renderAspectBoard()">
+                <option value="all">All</option>
+                <option value="scene">Scene only</option>
+                <option value="pcs">Players only</option>
+                <option value="npcs">Opposition only</option>
+              </select>
+              <button class="btn mini" onclick="clearAllActiveAspects()" title="Removes all active aspects (scene + applied)">🧹 Clear Active</button>
+            </div>
+          </div>
+
+          <div class="aspectlist" id="aspectList"></div>
+        </div>
+      </div>
+
+      <!-- GM Roller -->
+      <div class="card" style="margin-top: 14px;">
+        <div class="cardhead">
+          <h3>🎲 GM Quick Roller</h3>
+          <button class="btn mini" onclick="rollDice()">Roll</button>
+        </div>
+        <div class="cardbody">
+          <div class="row">
+            <input type="text" id="rollReason" placeholder="Skill/Reason..." />
+            <input type="number" id="rollBonus" value="0" style="max-width: 110px; text-align:center; font-weight: 900;" />
+          </div>
+          <div id="rollResult" style="margin-top:12px; text-align:center; font-weight: 950; color: var(--gold); min-height: 1.4em;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: NPCS -->
+    <div>
+      <div class="colhead npcs">
+        <div class="coltitle">
+          <span>💀 Opposition</span>
+          <div class="right">
+            <button class="btn mini btn-red" onclick="addNPC()">+ Add</button>
+            <input type="file" id="npcImportInput" accept="application/json" multiple style="display:none" onchange="importNPCFiles(this)" />
+            <button class="btn mini" onclick="document.getElementById('npcImportInput').click()">⭳ Import</button>
+          </div>
+        </div>
+      </div>
+      <div class="stack" id="npc-column"></div>
+    </div>
+  </div>
+
+  <div class="toastwrap" id="toastWrap" aria-live="polite"></div>
+
+<script>
+/* =========================
+   Storage / helpers
+========================= */
+const STORAGE_WEBHOOK = "fateGM_webhook_v3";
+const SCHEMA_VERSION = 3;
+
+function toast(title, message, type="info", timeout=2600){
+  const wrap = document.getElementById("toastWrap");
+  const el = document.createElement("div");
+  el.className = "toast";
+  const icon = type==="success" ? "✅" : type==="error" ? "⚠️" : type==="warn" ? "🟡" : "ℹ️";
+  el.innerHTML = `
+    <div class="icon">${icon}</div>
+    <div class="msg"><b>${escapeHtml(title)}</b><div>${escapeHtml(message)}</div></div>
+    <button class="x" aria-label="Dismiss">✕</button>
+  `;
+  el.querySelector(".x").onclick = ()=> el.remove();
+  wrap.appendChild(el);
+  if(timeout) setTimeout(()=> { if(el.isConnected) el.remove(); }, timeout);
+}
+
+function escapeHtml(str){
+  return String(str ?? "").replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[s]));
+}
+function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+function newId(prefix="id"){
+  return prefix + "_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+}
+function copyText(text){
+  if(!text) return;
+  navigator.clipboard?.writeText(text).then(
+    ()=> toast("Copied", "Copied to clipboard.", "success"),
+    ()=> toast("Copy failed", "Clipboard permission denied.", "error", 4200)
+  );
+}
+function autosizeTextarea(el){
+  if(!el) return;
+  el.style.height = "auto";
+  el.style.height = (el.scrollHeight + 2) + "px";
+}
+document.addEventListener("input", (e)=>{
+  if(e.target && e.target.tagName === "TEXTAREA") autosizeTextarea(e.target);
+});
+
+/* =========================
+   Scene image + webhook
+========================= */
+function updateSceneImg(){
+  const url = document.getElementById("sceneImgUrl").value.trim();
+  document.getElementById("sceneImg").src = url || "https://placehold.co/1000x500/111827/ffffff?text=Scene+Art";
+}
+function copySceneUrl(){ copyText(document.getElementById("sceneImgUrl").value.trim()); }
+function clearSceneImg(){
+  document.getElementById("sceneImgUrl").value = "";
+  updateSceneImg();
+}
+function loadSceneImgFile(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    const dataUrl = String(e.target.result || "");
+    document.getElementById("sceneImgUrl").value = dataUrl;
+    updateSceneImg();
+    toast("Image loaded", "Scene image loaded from HD.", "success");
+    input.value = "";
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveWebhook(){
+  try{ localStorage.setItem(STORAGE_WEBHOOK, document.getElementById("webhookUrl").value || ""); }catch(_){}
+}
+function loadWebhook(){
+  try{
+    const w = localStorage.getItem(STORAGE_WEBHOOK);
+    if(w) document.getElementById("webhookUrl").value = w;
+  }catch(_){}
+}
+
+/* =========================
+   ACTIVE Aspect Board ONLY
+   (Scene + applied aspects during play)
+========================= */
+let activeAspectStore = []; // { id, target: {type:'scene'|'pc'|'npc', id?:string}, text }
+
+function targetLabel(t){
+  if(!t) return { text:"Scene", kind:"scene" };
+  if(t.type === "scene") return { text:"Scene", kind:"scene" };
+  const card = document.querySelector(`.entity[data-eid="${CSS.escape(t.id)}"]`);
+  const name = card?.querySelector(".name")?.value?.trim();
+  const kind = t.type === "pc" ? "pc" : "npc";
+  return { text: name || (kind === "pc" ? "Player" : "NPC"), kind };
+}
+
+function rebuildAspectTargetSelect(){
+  const sel = document.getElementById("aspectTarget");
+  const prev = sel.value;
+  sel.innerHTML = "";
+
+  const optScene = document.createElement("option");
+  optScene.value = "scene:";
+  optScene.textContent = "Scene";
+  sel.appendChild(optScene);
+
+  const pcs = Array.from(document.querySelectorAll("#player-column .entity"));
+  if(pcs.length){
+    const grp = document.createElement("optgroup");
+    grp.label = "Players";
+    pcs.forEach(card=>{
+      const id = card.dataset.eid;
+      const nm = card.querySelector(".name")?.value?.trim() || "Player";
+      const opt = document.createElement("option");
+      opt.value = `pc:${id}`;
+      opt.textContent = nm;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  }
+
+  const npcs = Array.from(document.querySelectorAll("#npc-column .entity"));
+  if(npcs.length){
+    const grp = document.createElement("optgroup");
+    grp.label = "Opposition";
+    npcs.forEach(card=>{
+      const id = card.dataset.eid;
+      const nm = card.querySelector(".name")?.value?.trim() || "NPC";
+      const opt = document.createElement("option");
+      opt.value = `npc:${id}`;
+      opt.textContent = nm;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  }
+
+  if(prev && Array.from(sel.options).some(o=>o.value===prev)) sel.value = prev;
+  else sel.value = "scene:";
+}
+
+function parseTargetValue(v){
+  const [type, id] = String(v||"scene:").split(":");
+  if(type === "pc") return { type:"pc", id };
+  if(type === "npc") return { type:"npc", id };
+  return { type:"scene" };
+}
+
+function addActiveAspect(target, text){
+  const clean = String(text||"").trim();
+  if(!clean) return;
+  activeAspectStore.push({ id: newId("asp"), target, text: clean });
+  renderAspectBoard();
+  renderAllEntityActiveAspectChips();
+}
+
+function removeActiveAspect(aspId){
+  activeAspectStore = activeAspectStore.filter(a => a.id !== aspId);
+  renderAspectBoard();
+  renderAllEntityActiveAspectChips();
+}
+
+function updateActiveAspectText(aspId, newText){
+  const a = activeAspectStore.find(x => x.id === aspId);
+  if(!a) return;
+  a.text = String(newText||"").trim();
+  renderAllEntityActiveAspectChips();
+}
+
+function clearAllActiveAspects(){
+  if(!confirm("Clear ALL active aspects (scene + applied)?")) return;
+  activeAspectStore = [];
+  renderAspectBoard();
+  renderAllEntityActiveAspectChips();
+}
+
+function addAspectFromForm(){
+  const t = parseTargetValue(document.getElementById("aspectTarget").value);
+  const text = document.getElementById("aspectText").value;
+  addActiveAspect(t, text);
+  document.getElementById("aspectText").value = "";
+  document.getElementById("aspectText").focus();
+}
+
+function addSceneAspectFocus(){
+  document.getElementById("aspectTarget").value = "scene:";
+  document.getElementById("aspectText").focus();
+}
+
+function focusAddAspectForEntity(card){
+  const type = card.dataset.etype;
+  const eid = card.dataset.eid;
+  document.getElementById("aspectTarget").value = `${type}:${eid}`;
+  document.getElementById("aspectText").focus();
+}
+
+function renderAspectBoard(){
+  rebuildAspectTargetSelect();
+
+  const filter = document.getElementById("aspectFilter").value;
+  const list = document.getElementById("aspectList");
+  list.innerHTML = "";
+
+  const filtered = activeAspectStore.filter(a=>{
+    if(filter === "scene") return a.target.type === "scene";
+    if(filter === "pcs") return a.target.type === "pc";
+    if(filter === "npcs") return a.target.type === "npc";
+    return true;
+  });
+
+  if(!filtered.length){
+    const empty = document.createElement("div");
+    empty.className = "subcard";
+    empty.innerHTML = `<div class="label">No active aspects yet</div><div style="color:var(--muted); margin-top:6px;">Add one above. Only ACTIVE (during-play) aspects appear here.</div>`;
+    list.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(a=>{
+    const lbl = targetLabel(a.target);
+    const row = document.createElement("div");
+    row.className = "aspectrow";
+    row.innerHTML = `
+      <div><span class="badge ${lbl.kind}">${escapeHtml(lbl.text)}</span></div>
+      <input type="text" value="${escapeHtml(a.text)}" />
+      <div class="righttools">
+        <button class="btn mini" title="Remove aspect">🗑 Remove</button>
+      </div>
+    `;
+    const input = row.querySelector("input");
+    input.addEventListener("input", ()=> updateActiveAspectText(a.id, input.value));
+    row.querySelector("button").addEventListener("click", ()=> removeActiveAspect(a.id));
+    list.appendChild(row);
+  });
+}
+
+function getActiveAspectsForEntity(eid){
+  return activeAspectStore.filter(a => a.target.type !== "scene" && a.target.id === eid);
+}
+
+function renderAllEntityActiveAspectChips(){
+  document.querySelectorAll(".entity").forEach(card=> renderEntityActiveAspectChips(card));
+}
+
+function renderEntityActiveAspectChips(card){
+  const eid = card.dataset.eid;
+  const wrap = card.querySelector(".activeAspectChips");
+  if(!wrap) return;
+  wrap.innerHTML = "";
+
+  const aspects = getActiveAspectsForEntity(eid);
+  if(!aspects.length){
+    const small = document.createElement("div");
+    small.className = "label";
+    small.style.marginTop = "6px";
+    small.textContent = "No ACTIVE aspects.";
+    wrap.appendChild(small);
+    return;
+  }
+
+  const row = document.createElement("div");
+  row.className = "chiprow";
+  aspects.forEach(a=>{
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.innerHTML = `${escapeHtml(a.text)} <span class="x" title="Remove">×</span>`;
+    tag.querySelector(".x").onclick = ()=> removeActiveAspect(a.id);
+    row.appendChild(tag);
+  });
+  wrap.appendChild(row);
+}
+
+/* =========================
+   Entity builders + lists
+========================= */
+function setStressState(trackEl, total, activeIdxs, kind){
+  const boxes = trackEl.querySelector(".boxes");
+  boxes.innerHTML = "";
+  for(let i=1;i<=total;i++){
+    const b = document.createElement("div");
+    b.className = `box ${kind}` + (activeIdxs.includes(i-1) ? " on" : "");
+    b.textContent = i;
+    b.onclick = ()=> b.classList.toggle("on");
+    boxes.appendChild(b);
+  }
+}
+function getStressState(trackEl){
+  const boxes = Array.from(trackEl.querySelectorAll(".box"));
+  return {
+    total: boxes.length,
+    active: boxes.map((b,idx)=> b.classList.contains("on") ? idx : -1).filter(i=>i>=0)
+  };
+}
+function adjustStress(trackEl, delta, kind){
+  const state = getStressState(trackEl);
+  let total = clamp(state.total + delta, 1, 10);
+  const active = state.active.filter(i => i < total);
+  setStressState(trackEl, total, active, kind);
+}
+
+/* textarea list (notes, stunts) */
+function makeTextAreaItemRow(text="", placeholder="Type..."){
+  const row = document.createElement("div");
+  row.className = "item";
+  row.innerHTML = `
+    <textarea rows="1" placeholder="${escapeHtml(placeholder)}"></textarea>
+    <button class="del" title="Remove">×</button>
+  `;
+  const ta = row.querySelector("textarea");
+  ta.value = text || "";
+  autosizeTextarea(ta);
+  row.querySelector(".del").onclick = ()=> row.remove();
+  ta.addEventListener("input", ()=> autosizeTextarea(ta));
+  return row;
+}
+function listGetValues(listEl){
+  return Array.from(listEl.querySelectorAll("textarea"))
+    .map(t=> t.value.trim())
+    .filter(Boolean);
+}
+function listSetValues(listEl, arr, placeholder="Type..."){
+  listEl.innerHTML = "";
+  (arr||[]).forEach(v=> listEl.appendChild(makeTextAreaItemRow(v, placeholder)));
+  if(!listEl.children.length) listEl.appendChild(makeTextAreaItemRow("", placeholder));
+}
+function listAddRow(listEl, placeholder="Type..."){
+  listEl.appendChild(makeTextAreaItemRow("", placeholder));
+  const ta = listEl.lastElementChild.querySelector("textarea");
+  ta.focus();
+}
+
+/* input list (sheet aspects: others) */
+function makeInputRow(text="", placeholder="Aspect..."){
+  const row = document.createElement("div");
+  row.className = "irow";
+  row.innerHTML = `
+    <input type="text" placeholder="${escapeHtml(placeholder)}" />
+    <button class="del" title="Remove">×</button>
+  `;
+  row.querySelector("input").value = text || "";
+  row.querySelector(".del").onclick = ()=> row.remove();
+  return row;
+}
+function ilistGetValues(listEl){
+  return Array.from(listEl.querySelectorAll("input[type='text']"))
+    .map(i=> i.value.trim())
+    .filter(Boolean);
+}
+function ilistSetValues(listEl, arr, placeholder="Aspect..."){
+  listEl.innerHTML = "";
+  (arr||[]).forEach(v=> listEl.appendChild(makeInputRow(v, placeholder)));
+  if(!listEl.children.length) listEl.appendChild(makeInputRow("", placeholder));
+}
+function ilistAddRow(listEl, placeholder="Aspect..."){
+  listEl.appendChild(makeInputRow("", placeholder));
+  listEl.lastElementChild.querySelector("input").focus();
+}
+
+function toggleCollapse(card){
+  const body = card.querySelector(".entitybody");
+  const btn = card.querySelector(".collapse");
+  const hidden = body.classList.toggle("hidden");
+  btn.textContent = hidden ? "▸" : "▾";
+}
+
+function removeEntityCard(card){
+  const eid = card.dataset.eid;
+  // remove ACTIVE aspects tied to this entity
+  activeAspectStore = activeAspectStore.filter(a => !(a.target.type !== "scene" && a.target.id === eid));
+  card.remove();
+  renderAspectBoard();
+  renderAllEntityActiveAspectChips();
+  rebuildAspectTargetSelect();
+}
+
+function addPlayer(name=""){
+  const col = document.getElementById("player-column");
+  const card = document.createElement("div");
+  card.className = "entity pc";
+  card.dataset.eid = newId("pc");
+  card.dataset.etype = "pc";
+
+  card.innerHTML = `
+    <div class="entityhead">
+      <button class="trash" title="Delete">🗑</button>
+      <div class="turn" title="Popcorn initiative: click to mark turn"></div>
+      <input type="text" class="name entityname" placeholder="Character Name" value="${escapeHtml(name)}" />
+      <input type="number" class="fp" value="3" min="0" title="Fate Points" />
+      <button class="collapse" title="Collapse / expand">▾</button>
+    </div>
+
+    <div class="entitybody">
+      <div class="row">
+        <div style="flex:1;">
+          <div class="label">High Concept</div>
+          <input type="text" class="concept" placeholder="High Concept..." />
+        </div>
+        <div style="width: 220px;">
+          <div class="label">Include details in send</div>
+          <select class="include">
+            <option value="1" selected>Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="label">Sheet Aspects (NOT active board)</div>
+        <div style="margin-top:8px;">
+          <div class="label" style="text-transform:none; letter-spacing:0; font-weight:900;">Trouble</div>
+          <input type="text" class="trouble" placeholder="Trouble aspect..." />
+        </div>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <div class="label" style="text-transform:none; letter-spacing:0; font-weight:900;">Other Aspects</div>
+          <button class="btn mini addSheetAsp">+ Add</button>
+        </div>
+        <div class="ilist sheetOthers"></div>
+      </div>
+
+      <div class="subcard">
+        <div class="label">Stress</div>
+
+        <div class="track" data-kind="phys">
+          <div class="label">Phys</div>
+          <div class="boxes"></div>
+          <button class="tiny minus">−</button>
+          <button class="tiny plus">+</button>
+        </div>
+
+        <div class="track" data-kind="ment">
+          <div class="label">Ment</div>
+          <div class="boxes"></div>
+          <button class="tiny minus">−</button>
+          <button class="tiny plus">+</button>
+        </div>
+
+        <div class="track" data-kind="powr">
+          <div class="label" style="color: var(--purple);">Power</div>
+          <div class="boxes"></div>
+          <button class="tiny minus">−</button>
+          <button class="tiny plus">+</button>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div class="label">Conditions</div>
+          <div class="chiprow" style="margin-top:6px;">
+            <label class="tag" style="cursor:pointer;"><input type="checkbox" class="cond-winded" /> Winded</label>
+            <label class="tag" style="cursor:pointer;"><input type="checkbox" class="cond-burned" /> Burned</label>
+            <label class="tag" style="cursor:pointer;"><input type="checkbox" class="cond-scarred" /> Scarred</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="row tight" style="justify-content:space-between;">
+          <div>
+            <div class="label">Active Aspects (during play)</div>
+            <div style="color:var(--muted2); font-size:0.85rem; margin-top:4px;">These are what show on the middle board.</div>
+          </div>
+          <button class="btn mini btn-blue addActiveAspect">+ Apply</button>
+        </div>
+        <div class="activeAspectChips"></div>
+      </div>
+
+      <div class="subcard">
+        <div class="label">Consequences</div>
+        <div class="row" style="margin-top:8px;">
+          <input type="text" class="con-mild" placeholder="Mild (2)" />
+          <input type="text" class="con-mod" placeholder="Moderate (4)" />
+          <input type="text" class="con-sev" placeholder="Severe (6)" />
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="row tight" style="justify-content:space-between;">
+          <div class="label">Notes (rows)</div>
+          <button class="btn mini addNote">+ Note</button>
+        </div>
+        <div class="list notes"></div>
+      </div>
+    </div>
+  `;
+
+  // Wire events
+  card.querySelector(".trash").onclick = ()=> removeEntityCard(card);
+  card.querySelector(".turn").onclick = ()=> card.querySelector(".turn").classList.toggle("active");
+  card.querySelector(".collapse").onclick = ()=> toggleCollapse(card);
+
+  // Stress defaults
+  card.querySelectorAll(".track").forEach(tr=>{
+    const kind = tr.dataset.kind;
+    const total = kind === "powr" ? 3 : 4;
+    setStressState(tr, total, [], kind);
+    tr.querySelector(".minus").onclick = ()=> adjustStress(tr, -1, kind);
+    tr.querySelector(".plus").onclick = ()=> adjustStress(tr,  1, kind);
+  });
+
+  // Sheet aspects list
+  const sheetOthers = card.querySelector(".ilist.sheetOthers");
+  ilistSetValues(sheetOthers, [], "Aspect...");
+  card.querySelector(".addSheetAsp").onclick = ()=> ilistAddRow(sheetOthers, "Aspect...");
+
+  // Notes list default
+  const notesList = card.querySelector(".list.notes");
+  listSetValues(notesList, [], "Note...");
+  card.querySelector(".addNote").onclick = ()=> listAddRow(notesList, "Note...");
+
+  // Active aspects button -> focuses board with this entity selected
+  card.querySelector(".addActiveAspect").onclick = ()=> focusAddAspectForEntity(card);
+
+  // Name change should refresh dropdown labels + board labels
+  card.querySelector(".name").addEventListener("input", ()=>{
+    rebuildAspectTargetSelect();
+    renderAspectBoard();
+  });
+
+  col.appendChild(card);
+  rebuildAspectTargetSelect();
+  renderEntityActiveAspectChips(card);
+  applyFilter();
+  return card;
+}
+
+function addNPC(name=""){
+  const col = document.getElementById("npc-column");
+  const card = document.createElement("div");
+  card.className = "entity npc";
+  card.dataset.eid = newId("npc");
+  card.dataset.etype = "npc";
+
+  card.innerHTML = `
+    <div class="entityhead">
+      <button class="trash" title="Delete">🗑</button>
+      <div class="turn" title="Popcorn initiative: click to mark turn"></div>
+      <input type="text" class="name entityname" placeholder="NPC Name" value="${escapeHtml(name)}" />
+      <button class="collapse" title="Collapse / expand">▾</button>
+    </div>
+
+    <div class="entitybody">
+      <div class="row">
+        <div style="flex:1;">
+          <div class="label">High Concept / Role</div>
+          <input type="text" class="concept" placeholder="What are they?" />
+        </div>
+        <div style="width: 220px;">
+          <div class="label">Include details in send</div>
+          <select class="include">
+            <option value="1" selected>Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="label">Sheet Aspects (NOT active board)</div>
+        <div style="margin-top:8px;">
+          <div class="label" style="text-transform:none; letter-spacing:0; font-weight:900;">Trouble</div>
+          <input type="text" class="trouble" placeholder="Trouble aspect (optional)..." />
+        </div>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <div class="label" style="text-transform:none; letter-spacing:0; font-weight:900;">Other Aspects</div>
+          <button class="btn mini addSheetAsp">+ Add</button>
+        </div>
+        <div class="ilist sheetOthers"></div>
+      </div>
+
+      <div class="subcard">
+        <div class="label">Stress</div>
+        <div class="track" data-kind="phys">
+          <div class="label">Phys</div>
+          <div class="boxes"></div>
+          <button class="tiny minus">−</button>
+          <button class="tiny plus">+</button>
+        </div>
+        <div class="track" data-kind="ment">
+          <div class="label">Ment</div>
+          <div class="boxes"></div>
+          <button class="tiny minus">−</button>
+          <button class="tiny plus">+</button>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <div class="row tight" style="justify-content:space-between;">
+          <div>
+            <div class="label">Active Aspects (during play)</div>
+            <div style="color:var(--muted2); font-size:0.85rem; margin-top:4px;">These are what show on the middle board.</div>
+          </div>
+          <button class="btn mini btn-blue addActiveAspect">+ Apply</button>
+        </div>
+        <div class="activeAspectChips"></div>
+      </div>
+
+      <div class="subcard">
+        <div class="label">Skills</div>
+        <div class="row" style="margin-top:8px;">
+          <input type="text" class="skillName" placeholder="Skill" />
+          <input type="number" class="skillBonus" value="0" style="max-width: 110px; text-align:center; font-weight: 900;" />
+          <button class="btn mini btn-blue addSkill" style="max-width: 120px;">+ Add</button>
+        </div>
+        <div class="list skills"></div>
+      </div>
+
+      <div class="subcard">
+        <div class="row tight" style="justify-content:space-between;">
+          <div class="label">Stunts (rows)</div>
+          <button class="btn mini addStunt">+ Stunt</button>
+        </div>
+        <div class="list stunts"></div>
+      </div>
+
+      <div class="subcard">
+        <div class="row tight" style="justify-content:space-between;">
+          <div class="label">Notes (rows)</div>
+          <button class="btn mini addNote">+ Note</button>
+        </div>
+        <div class="list notes"></div>
+      </div>
+    </div>
+  `;
+
+  card.querySelector(".trash").onclick = ()=> removeEntityCard(card);
+  card.querySelector(".turn").onclick = ()=> card.querySelector(".turn").classList.toggle("active");
+  card.querySelector(".collapse").onclick = ()=> toggleCollapse(card);
+
+  // Stress defaults
+  card.querySelectorAll(".track").forEach(tr=>{
+    const kind = tr.dataset.kind;
+    setStressState(tr, 2, [], kind);
+    tr.querySelector(".minus").onclick = ()=> adjustStress(tr, -1, kind);
+    tr.querySelector(".plus").onclick = ()=> adjustStress(tr,  1, kind);
+  });
+
+  // Sheet aspects list
+  const sheetOthers = card.querySelector(".ilist.sheetOthers");
+  ilistSetValues(sheetOthers, [], "Aspect...");
+  card.querySelector(".addSheetAsp").onclick = ()=> ilistAddRow(sheetOthers, "Aspect...");
+
+  // Active aspects button
+  card.querySelector(".addActiveAspect").onclick = ()=> focusAddAspectForEntity(card);
+
+  // Lists
+  const notesList = card.querySelector(".list.notes");
+  const stuntsList = card.querySelector(".list.stunts");
+  const skillsList = card.querySelector(".list.skills");
+  listSetValues(notesList, [], "Note...");
+  listSetValues(stuntsList, [], "Stunt...");
+  skillsList.innerHTML = "";
+
+  card.querySelector(".addNote").onclick = ()=> listAddRow(notesList, "Note...");
+  card.querySelector(".addStunt").onclick = ()=> listAddRow(stuntsList, "Stunt...");
+
+  card.querySelector(".addSkill").onclick = ()=>{
+    const nm = card.querySelector(".skillName").value.trim();
+    const bn = parseInt(card.querySelector(".skillBonus").value,10) || 0;
+    if(!nm) return;
+    addNpcSkillRow(skillsList, nm, bn, card);
+    card.querySelector(".skillName").value = "";
+    card.querySelector(".skillBonus").value = 0;
+  };
+
+  card.querySelector(".name").addEventListener("input", ()=>{
+    rebuildAspectTargetSelect();
+    renderAspectBoard();
+  });
+
+  col.appendChild(card);
+  rebuildAspectTargetSelect();
+  renderEntityActiveAspectChips(card);
+  applyFilter();
+  return card;
+}
+
+function addNpcSkillRow(skillsList, name, bonus, card){
+  const row = document.createElement("div");
+  row.className = "item";
+  const bonusText = bonus >= 0 ? `+${bonus}` : String(bonus);
+  row.innerHTML = `
+    <div style="flex:1;">
+      <div class="label" style="text-transform:none; letter-spacing:0; font-weight:950; margin-bottom:6px;">
+        ${escapeHtml(name)} <span style="color:var(--gold); font-weight:950;">(${escapeHtml(bonusText)})</span>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <button class="btn mini btn-blue roll" style="max-width: 120px;">🎲 Roll</button>
+        <button class="btn mini delBtn" style="max-width: 120px;">🗑 Remove</button>
+      </div>
+    </div>
+  `;
+  row.querySelector(".roll").onclick = ()=> rollNpcSkill(card, name, bonus);
+  row.querySelector(".delBtn").onclick = ()=> row.remove();
+  skillsList.appendChild(row);
+}
+
+/* =========================
+   Filtering
+========================= */
+function applyFilter(){
+  const q = document.getElementById("quickFind").value.trim().toLowerCase();
+  document.querySelectorAll(".entity").forEach(card=>{
+    const name = card.querySelector(".name")?.value?.trim().toLowerCase() || "";
+    card.style.display = (!q || name.includes(q)) ? "" : "none";
+  });
+}
+
+/* =========================
+   Reset / GM Fate
+========================= */
+function modFate(delta){
+  const el = document.getElementById("gmFate");
+  const v = parseInt(el.value,10) || 0;
+  el.value = Math.max(0, v + delta);
+}
+function resetTurns(){
+  document.querySelectorAll(".turn").forEach(t=> t.classList.remove("active"));
+}
+function resetAllStatus(){
+  document.querySelectorAll(".box.on").forEach(b=> b.classList.remove("on"));
+  document.querySelectorAll(".cond-winded, .cond-burned, .cond-scarred").forEach(chk => chk.checked = false);
+  toast("Reset", "Stress + conditions cleared.", "success");
+}
+
+/* =========================
+   Discord
+========================= */
+async function sendToDiscord(payload){
+  const url = document.getElementById("webhookUrl").value.trim();
+  if(!url){ toast("Webhook missing", "Paste a Discord webhook URL first.", "warn", 3600); return; }
+  try{
+    const res = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+    if(!res.ok){
+      const text = await res.text();
+      console.error("Discord error body:", text);
+      toast("Discord error", `${res.status} ${res.statusText}`, "error", 5200);
+    }
+  }catch(e){
+    console.error(e);
+    toast("Network error", "If you opened this as a local file, Discord may block it (CORS). Hosting the HTML usually fixes it.", "error", 5200);
+  }
+}
+async function testWebhook(){
+  await sendToDiscord({
+    username: "Game Master",
+    embeds: [{
+      title: "✅ Webhook Test",
+      description: "If you can read this, your webhook works.",
+      color: 5763719
+    }]
+  });
+  toast("Test sent", "Check Discord.", "success");
+}
+
+/* =========================
+   Dice
+========================= */
+function computeFateRoll(bonus){
+  let total = 0, symbols = "";
+  for(let i=0;i<4;i++){
+    const r = Math.floor(Math.random()*3)-1;
+    total += r;
+    symbols += (r===-1 ? "➖" : (r===0 ? "⬜" : "➕"));
+  }
+  const final = total + bonus;
+  const ladder = {
+    "-2":"Terrible","-1":"Poor","0":"Mediocre","1":"Average","2":"Fair","3":"Good","4":"Great","5":"Superb","6":"Fantastic","7":"Epic","8":"Legendary"
+  };
+  const adj = ladder[String(final)] || (final > 8 ? "Godlike" : "Abysmal");
+  return { total, final, symbols, adj };
+}
+function rollDice(){
+  const reason = document.getElementById("rollReason").value.trim();
+  const bonus = parseInt(document.getElementById("rollBonus").value,10) || 0;
+  const r = computeFateRoll(bonus);
+  document.getElementById("rollResult").textContent = `Dice: ${r.symbols}  ➜  Total: ${r.final} (${r.adj})`;
+
+  sendToDiscord({
+    username: "Game Master",
+    embeds: [{
+      title: reason ? `🎲 Rolling: ${reason}` : "🎲 GM Roll",
+      description: `**Dice:** ${r.symbols} (${r.total>0?("+"+r.total):r.total})\n**Bonus:** ${bonus}\n**Total:** __**${r.final}**__ (${r.adj})`,
+      color: 9807270
+    }]
+  });
+}
+function rollNpcSkill(card, skillName, bonus){
+  const npcName = card.querySelector(".name")?.value?.trim() || "Enemy";
+  const r = computeFateRoll(bonus);
+  document.getElementById("rollResult").textContent = `Dice: ${r.symbols}  ➜  Total: ${r.final} (${r.adj})`;
+
+  sendToDiscord({
+    username: "Game Master",
+    embeds: [{
+      title: `🎲 ${npcName} rolls ${skillName}`,
+      description: `**Skill:** ${skillName} (${bonus>=0?("+"+bonus):bonus})\n**Dice:** ${r.symbols} (${r.total>0?("+"+r.total):r.total})\n**Total:** __**${r.final}**__ (${r.adj})`,
+      color: 9807270
+    }]
+  });
+}
+
+/* =========================
+   Save / Load
+   - activeAspectStore = ACTIVE aspects only
+   - sheet aspects stored per entity (trouble + others) and do NOT appear in middle board
+========================= */
+function saveScene(){
+  const data = {
+    schemaVersion: SCHEMA_VERSION,
+    webhook: document.getElementById("webhookUrl").value || "",
+    scene: {
+      name: document.getElementById("sceneName").value || "",
+      img: document.getElementById("sceneImgUrl").value || "",
+      gmFate: document.getElementById("gmFate").value || 0
+    },
+    activeAspectStore: activeAspectStore,
+    players: [],
+    npcs: []
+  };
+
+  document.querySelectorAll("#player-column .entity").forEach(card=>{
+    const tracks = {};
+    card.querySelectorAll(".track").forEach(tr=>{
+      const kind = tr.dataset.kind;
+      tracks[kind] = getStressState(tr);
+    });
+
+    data.players.push({
+      id: card.dataset.eid,
+      name: card.querySelector(".name").value,
+      turn: card.querySelector(".turn").classList.contains("active"),
+      fp: card.querySelector(".fp").value,
+      concept: card.querySelector(".concept").value,
+      include: card.querySelector(".include").value === "1",
+      sheetAspects: {
+        trouble: card.querySelector(".trouble").value,
+        others: ilistGetValues(card.querySelector(".ilist.sheetOthers"))
+      },
+      stress: tracks,
+      cond: {
+        w: !!card.querySelector(".cond-winded")?.checked,
+        b: !!card.querySelector(".cond-burned")?.checked,
+        s: !!card.querySelector(".cond-scarred")?.checked
+      },
+      consequences: {
+        mild: card.querySelector(".con-mild").value,
+        moderate: card.querySelector(".con-mod").value,
+        severe: card.querySelector(".con-sev").value
+      },
+      notes: listGetValues(card.querySelector(".list.notes"))
+    });
+  });
+
+  document.querySelectorAll("#npc-column .entity").forEach(card=>{
+    const tracks = {};
+    card.querySelectorAll(".track").forEach(tr=>{
+      const kind = tr.dataset.kind;
+      tracks[kind] = getStressState(tr);
+    });
+
+    const skills = [];
+    card.querySelectorAll(".list.skills .item").forEach(it=>{
+      const label = it.querySelector(".label")?.textContent || "";
+      const m = label.match(/^(.*)\s\(([-+]?[\d]+)\)/);
+      if(m){
+        skills.push({ name: m[1].trim(), bonus: parseInt(m[2],10) || 0 });
+      }
+    });
+
+    data.npcs.push({
+      id: card.dataset.eid,
+      name: card.querySelector(".name").value,
+      turn: card.querySelector(".turn").classList.contains("active"),
+      concept: card.querySelector(".concept").value,
+      include: card.querySelector(".include").value === "1",
+      sheetAspects: {
+        trouble: card.querySelector(".trouble").value,
+        others: ilistGetValues(card.querySelector(".ilist.sheetOthers"))
+      },
+      stress: tracks,
+      skills,
+      stunts: listGetValues(card.querySelector(".list.stunts")),
+      notes: listGetValues(card.querySelector(".list.notes"))
+    });
+  });
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (data.scene.name || "Scene") + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  toast("Saved", "Scene JSON downloaded.", "success");
+}
+
+function loadScene(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+
+      document.getElementById("sceneName").value = data.scene?.name || "";
+      document.getElementById("sceneImgUrl").value = data.scene?.img || "";
+      updateSceneImg();
+      document.getElementById("gmFate").value = data.scene?.gmFate ?? 5;
+
+      if(typeof data.webhook === "string"){
+        document.getElementById("webhookUrl").value = data.webhook;
+        saveWebhook();
+      }
+
+      document.getElementById("player-column").innerHTML = "";
+      document.getElementById("npc-column").innerHTML = "";
+
+      // Detect older format
+      const isOld = (data.players && data.players.length && data.players[0].phys) || (data.npcs && data.npcs.length && data.npcs[0].aspect !== undefined);
+
+      // ACTIVE aspects:
+      // - new: data.activeAspectStore
+      // - old: data.scene.aspects -> convert to active scene aspects
+      activeAspectStore = Array.isArray(data.activeAspectStore) ? data.activeAspectStore : [];
+      if(isOld){
+        const oldSceneAsps = Array.isArray(data.scene?.aspects) ? data.scene.aspects : [];
+        oldSceneAsps.forEach(a=>{
+          const s = String(a||"").trim();
+          if(s) activeAspectStore.push({ id: newId("asp"), target:{type:"scene"}, text:s });
+        });
+      }
+
+      if(isOld){
+        // OLD PLAYERS
+        (data.players || []).forEach(p=>{
+          const card = addPlayer(p.name || "");
+          if(p._id) card.dataset.eid = p._id;
+          if(p.turn) card.querySelector(".turn").classList.add("active");
+          if(p.fp != null) card.querySelector(".fp").value = p.fp;
+          if(p.hc) card.querySelector(".concept").value = p.hc;
+          if(p.sendAspects != null) card.querySelector(".include").value = p.sendAspects ? "1" : "0";
+
+          // stress old
+          if(p.phys) setStressState(card.querySelector('.track[data-kind="phys"]'), p.phys.total||4, p.phys.active||[], "phys");
+          if(p.ment) setStressState(card.querySelector('.track[data-kind="ment"]'), p.ment.total||4, p.ment.active||[], "ment");
+          if(p.power) setStressState(card.querySelector('.track[data-kind="powr"]'), p.power.total||3, p.power.active||[], "powr");
+
+          if(p.cond){
+            card.querySelector(".cond-winded").checked = !!p.cond.w;
+            card.querySelector(".cond-burned").checked = !!p.cond.b;
+            card.querySelector(".cond-scarred").checked = !!p.cond.s;
+          }
+
+          // OLD "aspects" textarea is treated as SHEET aspects now (NOT active board)
+          const lines = String(p.aspects || "").split("\n").map(s=>s.trim()).filter(Boolean);
+          ilistSetValues(card.querySelector(".ilist.sheetOthers"), lines, "Aspect...");
+
+          // old notes -> notes list
+          const notesArr = [];
+          if(p.notes) notesArr.push(String(p.notes));
+          listSetValues(card.querySelector(".list.notes"), notesArr, "Note...");
+        });
+
+        // OLD NPCS
+        (data.npcs || []).forEach(n=>{
+          const card = addNPC(n.name || "");
+          if(n._id) card.dataset.eid = n._id;
+          if(n.turn) card.querySelector(".turn").classList.add("active");
+          if(n.aspect) card.querySelector(".concept").value = n.aspect;
+          if(n.sendAspects != null) card.querySelector(".include").value = n.sendAspects ? "1" : "0";
+
+          if(n.phys) setStressState(card.querySelector('.track[data-kind="phys"]'), n.phys.total||2, n.phys.active||[], "phys");
+          if(n.ment) setStressState(card.querySelector('.track[data-kind="ment"]'), n.ment.total||2, n.ment.active||[], "ment");
+
+          // old skills array -> best effort: if string, stash in notes; if array, ignore (your old format was mixed)
+          if (Array.isArray(n.skills)) {
+            const skillsList = card.querySelector(".list.skills");
+            skillsList.innerHTML = "";
+            n.skills.forEach(s=>{
+              if(s?.name) addNpcSkillRow(skillsList, s.name, parseInt(s.bonus,10)||0, card);
+            });
+          } else if (typeof n.skills === "string") {
+            listSetValues(card.querySelector(".list.notes"), [n.skills], "Note...");
+          }
+
+          if(n.stunts) listSetValues(card.querySelector(".list.stunts"), String(n.stunts||"").split("\n").map(s=>s.trim()).filter(Boolean), "Stunt...");
+          if(n.notes) listSetValues(card.querySelector(".list.notes"), String(n.notes||"").split("\n").map(s=>s.trim()).filter(Boolean), "Note...");
+
+          // old notes might contain aspects; we do NOT auto-mix them into active board.
+        });
+
+      } else {
+        // NEW FORMAT
+        (data.players || []).forEach(p=>{
+          const card = addPlayer(p.name || "");
+          if(p.id) card.dataset.eid = p.id;
+          if(p.turn) card.querySelector(".turn").classList.add("active");
+          card.querySelector(".fp").value = p.fp ?? 3;
+          card.querySelector(".concept").value = p.concept ?? "";
+          card.querySelector(".include").value = (p.include === false) ? "0" : "1";
+
+          if(p.sheetAspects){
+            card.querySelector(".trouble").value = p.sheetAspects.trouble || "";
+            ilistSetValues(card.querySelector(".ilist.sheetOthers"), p.sheetAspects.others || [], "Aspect...");
+          }
+
+          if(p.stress){
+            if(p.stress.phys) setStressState(card.querySelector('.track[data-kind="phys"]'), p.stress.phys.total||4, p.stress.phys.active||[], "phys");
+            if(p.stress.ment) setStressState(card.querySelector('.track[data-kind="ment"]'), p.stress.ment.total||4, p.stress.ment.active||[], "ment");
+            if(p.stress.powr) setStressState(card.querySelector('.track[data-kind="powr"]'), p.stress.powr.total||3, p.stress.powr.active||[], "powr");
+          }
+          if(p.cond){
+            card.querySelector(".cond-winded").checked = !!p.cond.w;
+            card.querySelector(".cond-burned").checked = !!p.cond.b;
+            card.querySelector(".cond-scarred").checked = !!p.cond.s;
+          }
+          if(p.consequences){
+            card.querySelector(".con-mild").value = p.consequences.mild || "";
+            card.querySelector(".con-mod").value = p.consequences.moderate || "";
+            card.querySelector(".con-sev").value = p.consequences.severe || "";
+          }
+          listSetValues(card.querySelector(".list.notes"), p.notes || [], "Note...");
+        });
+
+        (data.npcs || []).forEach(n=>{
+          const card = addNPC(n.name || "");
+          if(n.id) card.dataset.eid = n.id;
+          if(n.turn) card.querySelector(".turn").classList.add("active");
+          card.querySelector(".concept").value = n.concept ?? "";
+          card.querySelector(".include").value = (n.include === false) ? "0" : "1";
+
+          if(n.sheetAspects){
+            card.querySelector(".trouble").value = n.sheetAspects.trouble || "";
+            ilistSetValues(card.querySelector(".ilist.sheetOthers"), n.sheetAspects.others || [], "Aspect...");
+          }
+
+          if(n.stress){
+            if(n.stress.phys) setStressState(card.querySelector('.track[data-kind="phys"]'), n.stress.phys.total||2, n.stress.phys.active||[], "phys");
+            if(n.stress.ment) setStressState(card.querySelector('.track[data-kind="ment"]'), n.stress.ment.total||2, n.stress.ment.active||[], "ment");
+          }
+
+          const skillsList = card.querySelector(".list.skills");
+          skillsList.innerHTML = "";
+          (n.skills || []).forEach(s => addNpcSkillRow(skillsList, s.name, s.bonus, card));
+
+          listSetValues(card.querySelector(".list.stunts"), n.stunts || [], "Stunt...");
+          listSetValues(card.querySelector(".list.notes"), n.notes || [], "Note...");
+        });
+      }
+
+      rebuildAspectTargetSelect();
+      renderAspectBoard();
+      renderAllEntityActiveAspectChips();
+      applyFilter();
+
+      toast("Loaded", "Scene loaded successfully.", "success");
+    }catch(err){
+      console.error(err);
+      toast("Load failed", "That file wasn't valid for this GM panel.", "error", 5200);
+    }finally{
+      input.value = "";
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* =========================
+   Import from your Character Sheet JSON
+   IMPORTANT: Imports sheet aspects into the card ONLY.
+   Does NOT add them to activeAspectStore / middle board.
+========================= */
+function toInt(val, fallback){
+  const n = Number(val);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function importPCFiles(input){
+  const files = input.files;
+  if(!files || !files.length) return;
+
+  Array.from(files).forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        const data = JSON.parse(e.target.result);
+        importPCFromData(data);
+      }catch(err){
+        console.error(err);
+        toast("Import failed", `Bad JSON: ${file.name}`, "error", 4200);
+      }
+    };
+    reader.readAsText(file);
+  });
+  input.value = "";
+}
+
+function importNPCFiles(input){
+  const files = input.files;
+  if(!files || !files.length) return;
+
+  Array.from(files).forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        const data = JSON.parse(e.target.result);
+        importNPCFromData(data);
+      }catch(err){
+        console.error(err);
+        toast("Import failed", `Bad JSON: ${file.name}`, "error", 4200);
+      }
+    };
+    reader.readAsText(file);
+  });
+  input.value = "";
+}
+
+function importPCFromData(data){
+  if(!data || !data.meta) return;
+  const name = data.meta.name || "";
+  const card = addPlayer(name);
+
+  card.querySelector(".fp").value = parseInt(data.meta.fatePoints,10) || 3;
+
+  if(data.header?.concept) card.querySelector(".concept").value = data.header.concept;
+
+  // sheet aspects
+  if(data.aspects?.trouble) card.querySelector(".trouble").value = data.aspects.trouble;
+  if(Array.isArray(data.aspects?.others)){
+    ilistSetValues(card.querySelector(".ilist.sheetOthers"), data.aspects.others.filter(Boolean), "Aspect...");
+  }
+
+  // stress: health[0]=phys, health[1]=ment
+  if(Array.isArray(data.health)){
+    if(data.health[0]){
+      const t = data.health[0];
+      const total = toInt(t.count, Array.isArray(t.active) ? t.active.length : 4);
+      const active = [];
+      (t.active || []).forEach((v, idx)=> { if(v) active.push(idx); });
+      setStressState(card.querySelector('.track[data-kind="phys"]'), total, active, "phys");
+    }
+    if(data.health[1]){
+      const t = data.health[1];
+      const total = toInt(t.count, Array.isArray(t.active) ? t.active.length : 4);
+      const active = [];
+      (t.active || []).forEach((v, idx)=> { if(v) active.push(idx); });
+      setStressState(card.querySelector('.track[data-kind="ment"]'), total, active, "ment");
+    }
+  }
+
+  if(data.power?.track){
+    const t = data.power.track;
+    const total = toInt(t.count, Array.isArray(t.active) ? t.active.length : 3);
+    const active = [];
+    (t.active || []).forEach((v, idx)=> { if(v) active.push(idx); });
+    setStressState(card.querySelector('.track[data-kind="powr"]'), total, active, "powr");
+  }
+
+  if(Array.isArray(data.power?.conditions)){
+    const c = data.power.conditions;
+    if(c[0]) card.querySelector(".cond-winded").checked = !!c[0].checked;
+    if(c[1]) card.querySelector(".cond-burned").checked = !!c[1].checked;
+    if(c[2]) card.querySelector(".cond-scarred").checked = !!c[2].checked;
+  }
+
+  if(data.consequences){
+    listSetValues(card.querySelector(".list.notes"), [String(data.consequences)], "Note...");
+  }
+
+  toast("Imported", `PC: ${name || "Unnamed"}`, "success");
+}
+
+function importNPCFromData(data){
+  if(!data || !data.meta) return;
+  const name = data.meta.name || "";
+  const card = addNPC(name);
+
+  if(data.header?.concept) card.querySelector(".concept").value = data.header.concept;
+
+  // sheet aspects
+  if(data.aspects?.trouble) card.querySelector(".trouble").value = data.aspects.trouble;
+  if(Array.isArray(data.aspects?.others)){
+    ilistSetValues(card.querySelector(".ilist.sheetOthers"), data.aspects.others.filter(Boolean), "Aspect...");
+  }
+
+  if(Array.isArray(data.health)){
+    if(data.health[0]){
+      const t = data.health[0];
+      const total = toInt(t.count, Array.isArray(t.active) ? t.active.length : 2);
+      const active = [];
+      (t.active || []).forEach((v, idx)=> { if(v) active.push(idx); });
+      setStressState(card.querySelector('.track[data-kind="phys"]'), total, active, "phys");
+    }
+    if(data.health[1]){
+      const t = data.health[1];
+      const total = toInt(t.count, Array.isArray(t.active) ? t.active.length : 2);
+      const active = [];
+      (t.active || []).forEach((v, idx)=> { if(v) active.push(idx); });
+      setStressState(card.querySelector('.track[data-kind="ment"]'), total, active, "ment");
+    }
+  }
+
+  if(Array.isArray(data.skills)){
+    const parsed = [];
+    data.skills.forEach(entry=>{
+      if(!entry) return;
+      const bonusStr = String(entry.bonus || "0").trim();
+      const bonus = parseInt(bonusStr.replace("+",""),10) || 0;
+      (entry.skills || []).forEach(skillName=>{
+        const s = String(skillName||"").trim();
+        if(s) parsed.push({ name: s, bonus });
+      });
+    });
+    const skillsList = card.querySelector(".list.skills");
+    skillsList.innerHTML = "";
+    parsed.forEach(s=> addNpcSkillRow(skillsList, s.name, s.bonus, card));
+  }
+
+  if(Array.isArray(data.stunts)){
+    const lines = data.stunts.map(s=>{
+      const n = String(s?.name||"").trim();
+      const d = String(s?.desc||"").trim();
+      return (n && d) ? `${n}: ${d}` : (n || d);
+    }).filter(Boolean);
+    listSetValues(card.querySelector(".list.stunts"), lines, "Stunt...");
+  }
+
+  toast("Imported", `NPC: ${name || "Unnamed"}`, "success");
+}
+
+/* =========================
+   Dashboard to Discord
+   - scene aspects from ACTIVE board (scene target)
+   - includes ACTIVE aspects per entity
+   - optionally includes sheet aspects (HC/Trouble/others) if Include=Yes
+========================= */
+function clip(str, max){
+  str = String(str ?? "");
+  return str.length > max ? str.slice(0, max-1) + "…" : str;
+}
+function summarizeActiveAspects(eid, max=3){
+  return getActiveAspectsForEntity(eid).map(a=>a.text).filter(Boolean).slice(0, max);
+}
+function summarizeSheetAspects(card, max=3){
+  const trouble = card.querySelector(".trouble")?.value?.trim();
+  const others = ilistGetValues(card.querySelector(".ilist.sheetOthers")).slice(0, max);
+  const out = [];
+  if(trouble) out.push(`Trouble: ${trouble}`);
+  others.forEach(o=> out.push(o));
+  return out.slice(0, max);
+}
+
+function sendFullDashboard(){
+  const sceneName = document.getElementById("sceneName").value || "Current Scene";
+  const sceneImg = document.getElementById("sceneImgUrl").value.trim();
+  const gmFate = document.getElementById("gmFate").value;
+
+  const sceneAspects = activeAspectStore
+    .filter(a=>a.target.type === "scene")
+    .map(a=>`• ${a.text}`)
+    .join("\n");
+
+  let pList = "";
+  document.querySelectorAll("#player-column .entity").forEach(c=>{
+    const include = c.querySelector(".include").value === "1";
+    const n = c.querySelector(".name").value || "Unknown";
+    const turn = c.querySelector(".turn").classList.contains("active") ? "✅" : "⬜";
+    const fp = c.querySelector(".fp").value || "0";
+
+    const phys = c.querySelectorAll('.track[data-kind="phys"] .box.on').length + "/" + c.querySelectorAll('.track[data-kind="phys"] .box').length;
+    const ment = c.querySelectorAll('.track[data-kind="ment"] .box.on').length + "/" + c.querySelectorAll('.track[data-kind="ment"] .box').length;
+    const powr = c.querySelectorAll('.track[data-kind="powr"] .box.on').length + "/" + c.querySelectorAll('.track[data-kind="powr"] .box').length;
+
+    const conds = [];
+    if(c.querySelector(".cond-winded").checked) conds.push("⚠️ Winded");
+    if(c.querySelector(".cond-burned").checked) conds.push("🔥 Burned");
+    if(c.querySelector(".cond-scarred").checked) conds.push("🤕 Scarred");
+
+    const cons = [
+      c.querySelector(".con-mild").value.trim(),
+      c.querySelector(".con-mod").value.trim(),
+      c.querySelector(".con-sev").value.trim()
+    ].filter(Boolean);
+
+    const notes = listGetValues(c.querySelector(".list.notes")).slice(0,2);
+    const activeAsp = summarizeActiveAspects(c.dataset.eid, 3);
+    const sheetAsp = summarizeSheetAspects(c, 3);
+
+    pList += `${turn} **${n}** (FP:${fp})\n└ P:${phys} M:${ment} Pow:${powr}\n`;
+    if(conds.length) pList += `└ ${conds.join(", ")}\n`;
+    if(activeAsp.length) pList += `└ **Active:** ${activeAsp.join(" | ")}\n`;
+    if(include && sheetAsp.length) pList += `└ **Sheet:** ${sheetAsp.join(" | ")}\n`;
+    if(include && cons.length) pList += `└ **Cons:** ${cons.join(" | ")}\n`;
+    if(include && notes.length) pList += `└ 📝 ${notes.join(" / ")}\n`;
+    pList += "\n";
+  });
+
+  let nList = "";
+  document.querySelectorAll("#npc-column .entity").forEach(c=>{
+    const include = c.querySelector(".include").value === "1";
+    const n = c.querySelector(".name").value || "Enemy";
+    const turn = c.querySelector(".turn").classList.contains("active") ? "✅" : "⬜";
+    const role = c.querySelector(".concept").value.trim();
+
+    const phys = c.querySelectorAll('.track[data-kind="phys"] .box.on').length + "/" + c.querySelectorAll('.track[data-kind="phys"] .box').length;
+    const ment = c.querySelectorAll('.track[data-kind="ment"] .box.on').length + "/" + c.querySelectorAll('.track[data-kind="ment"] .box').length;
+
+    const skills = [];
+    c.querySelectorAll(".list.skills .item .label").forEach((lbl, idx)=>{ if(idx < 4) skills.push(lbl.textContent.trim()); });
+
+    const stunts = listGetValues(c.querySelector(".list.stunts")).slice(0,2);
+    const notes = listGetValues(c.querySelector(".list.notes")).slice(0,2);
+    const activeAsp = summarizeActiveAspects(c.dataset.eid, 3);
+    const sheetAsp = summarizeSheetAspects(c, 3);
+
+    nList += `${turn} **${n}**\n`;
+    if(role) nList += `└ _${role}_\n`;
+    nList += `└ P:${phys} | M:${ment}\n`;
+    if(skills.length) nList += `└ ⚔️ ${skills.join(" | ")}\n`;
+    if(activeAsp.length) nList += `└ **Active:** ${activeAsp.join(" | ")}\n`;
+    if(include && sheetAsp.length) nList += `└ **Sheet:** ${sheetAsp.join(" | ")}\n`;
+    if(include && stunts.length) nList += `└ 🧨 ${stunts.join(" / ")}\n`;
+    if(include && notes.length) nList += `└ 📝 ${notes.join(" / ")}\n`;
+    nList += "\n";
+  });
+
+  pList = clip(pList || "None", 1000);
+  nList = clip(nList || "None", 1000);
+  const desc = sceneAspects ? clip(`**Scene Aspects:**\n${sceneAspects}`, 3800) : "";
+
+  sendToDiscord({
+    username: "Game Master",
+    embeds: [{
+      title: `📍 ${clip(sceneName, 200)}`,
+      description: desc,
+      image: sceneImg ? { url: sceneImg } : undefined,
+      footer: { text: `GM Fate Points: ${gmFate}` },
+      color: 5793266,
+      fields: [
+        { name: "🦸 Heroes", value: pList || "None", inline: true },
+        { name: "💀 Opposition", value: nList || "None", inline: true }
+      ]
+    }]
+  });
+
+  toast("Sent", "Dashboard posted to Discord.", "success");
+}
+
+/* =========================
+   Init
+========================= */
+window.addEventListener("load", ()=>{
+  loadWebhook();
+
+  if(document.getElementById("player-column").children.length === 0) addPlayer("Player 1");
+  if(document.getElementById("npc-column").children.length === 0) addNPC("Mook");
+
+  rebuildAspectTargetSelect();
+  renderAspectBoard();
+  renderAllEntityActiveAspectChips();
+});
+</script>
+</body>
+</html>
