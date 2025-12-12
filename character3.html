@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fate Character Sheet (Improved Dark Mode)</title>
+
+  <style>
+    :root{
+      --bg0:#0c0c0f;
+      --bg1:#121218;
+      --card:#171722;
+      --card2:#1c1c2a;
+      --stroke:#2a2a3b;
+      --stroke2:#353550;
+
+      --text:#e9e9f2;
+      --muted:#b8b8c6;
+      --muted2:#8f8fa3;
+
+      --primary:#5AB9EA;
+      --secondary:#8860D0;
+      --accent:#5680E9;
+
+      --danger:#e74c3c;
+      --success:#2ecc71;
+      --warn:#f1c40f;
+
+      --input: rgba(255,255,255,0.06);
+      --inputFocus: rgba(255,255,255,0.10);
+
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 14px;
+      --radiusSm: 10px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(1200px 800px at 30% 10%, rgba(90,185,234,0.10), transparent 60%),
+        radial-gradient(900px 700px at 80% 30%, rgba(136,96,208,0.10), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      padding: 18px;
+    }
+
+    a{ color: var(--primary); }
+
+    /* Top Bar */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(12,12,15,0.70);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+    .topbar-row{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+    .topbar .spacer{ flex:1; min-width: 10px; }
+
+    .webhook{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex: 1 1 520px;
+      min-width: 260px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+    }
+    .webhook label{
+      font-size: 0.85rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    #webhookUrl{
+      flex:1;
+      min-width: 180px;
+    }
+
+    /* Layout */
+    .container{
+      max-width: 1100px;
+      margin: 0 auto;
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      align-items:start;
+    }
+
+    @media (max-width: 900px){
+      .container{ grid-template-columns: 1fr; }
+      .topbar{ position: static; }
+    }
+
+    /* Cards */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-inner{ padding: 16px; }
+    .card-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+    }
+    .card-header h3{
+      margin:0;
+      font-size: 1rem;
+      letter-spacing: 0.2px;
+      color: var(--text);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .subtle{
+      color: var(--muted2);
+      font-size: 0.85rem;
+    }
+
+    /* Inputs */
+    input[type="text"], textarea, input[type="number"]{
+      width:100%;
+      color: var(--text);
+      background: var(--input);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 10px;
+      padding: 8px 10px;
+      outline: none;
+      transition: 0.15s ease;
+      font: inherit;
+    }
+    textarea{ resize: vertical; min-height: 80px; }
+    input[type="text"]:focus, textarea:focus, input[type="number"]:focus{
+      background: var(--inputFocus);
+      border-color: rgba(90,185,234,0.55);
+      box-shadow: 0 0 0 3px rgba(90,185,234,0.15);
+    }
+    input::placeholder, textarea::placeholder{ color: rgba(233,233,242,0.40); }
+
+    .clean-input{
+      border:none !important;
+      background: transparent !important;
+      padding: 0 !important;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+    .clean-input:focus{
+      padding: 6px 8px !important;
+      background: rgba(255,255,255,0.05) !important;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.10) !important;
+    }
+
+    /* Buttons */
+    .btn{
+      border:none;
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor:pointer;
+      font-weight: 750;
+      color: #0a0a0a;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      transition: transform 0.12s ease, filter 0.12s ease, background 0.12s ease;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.06); }
+    .btn:active{ transform: translateY(0px); filter: brightness(0.98); }
+    .btn-secondary{
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .btn-primary{ background: var(--primary); }
+    .btn-success{ background: var(--success); }
+    .btn-danger{ background: var(--danger); color: #fff; }
+    .btn-ghost{
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .mini-btn{
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition: 0.15s ease;
+    }
+    .mini-btn:hover{ border-color: rgba(90,185,234,0.45); transform: translateY(-1px); }
+    .mini-btn:active{ transform: translateY(0px); }
+
+    /* Left column: Image */
+    .image-wrap{
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .img-box{
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      overflow:hidden;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.45);
+    }
+    .img-box img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    /* Header / identity */
+    .identity{
+      padding: 16px;
+      display:grid;
+      grid-template-columns: 1fr 120px;
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 520px){
+      .identity{ grid-template-columns: 1fr; }
+    }
+    .identity textarea{ min-height: 66px; }
+
+    .fp{
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.10);
+      padding: 10px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 8px;
+    }
+    .fp input{
+      width: 74px;
+      height: 74px;
+      border-radius: 999px;
+      text-align:center;
+      font-size: 1.6rem;
+      font-weight: 900;
+      background: rgba(0,0,0,0.20);
+      border: 2px solid rgba(255,255,255,0.20);
+      padding: 0;
+      -moz-appearance: textfield;
+    }
+    .fp input::-webkit-outer-spin-button,
+    .fp input::-webkit-inner-spin-button{ -webkit-appearance: none; margin:0; }
+    .fp .label{
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align:center;
+    }
+
+    /* Stress tracks */
+    .track{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .track-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .track-controls{
+      display:flex;
+      gap:6px;
+    }
+    .track-btn{
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      cursor:pointer;
+      font-weight: 900;
+    }
+    .track-btn:hover{ border-color: rgba(90,185,234,0.45); }
+
+    .stress-track{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .stress-box{
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.05);
+      color: rgba(233,233,242,0.65);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      font-weight: 900;
+      transition: 0.12s ease;
+    }
+    .stress-box:hover{ border-color: rgba(231,76,60,0.6); }
+    .stress-box[aria-pressed="true"]{
+      background: rgba(231,76,60,0.95);
+      border-color: rgba(231,76,60,0.95);
+      color: #fff;
+    }
+
+    .power-box:hover{ border-color: rgba(136,96,208,0.6); }
+    .power-box[aria-pressed="true"]{
+      background: rgba(136,96,208,0.95);
+      border-color: rgba(136,96,208,0.95);
+      color: #fff;
+    }
+
+    /* Power conditions */
+    .cond{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .condition-row{
+      display:grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items:start;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+    }
+    .condition-row input[type="checkbox"]{
+      width: 18px;
+      height: 18px;
+      margin-top: 6px;
+      accent-color: var(--secondary);
+    }
+    .condition-row .name{
+      font-weight: 850;
+      margin-bottom: 6px;
+    }
+    .condition-row .desc{
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    /* Aspects */
+    .stack{ display:flex; flex-direction:column; gap: 10px; }
+
+    /* Skills */
+    .skills{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .skill-tier{
+      display:grid;
+      grid-template-columns: 56px 1fr;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px dashed rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.02);
+    }
+    .skill-val{
+      font-weight: 950;
+      color: rgba(90,185,234,0.95);
+      font-size: 1.05rem;
+      padding-top: 6px;
+      text-align:center;
+      border-radius: 10px;
+      border: 1px solid rgba(90,185,234,0.25);
+      background: rgba(90,185,234,0.06);
+      height: fit-content;
+    }
+    .skill-container{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .skill-chip-wrapper{
+      position: relative;
+      width: 140px;
+      min-width: 120px;
+      flex: 0 1 140px;
+    }
+    .skill-input{
+      padding-right: 38px; /* space for dice btn */
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px;
+      font-weight: 650;
+    }
+    .skill-dice{
+      position:absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      cursor:pointer;
+    }
+    .skill-dice:hover{ border-color: rgba(90,185,234,0.45); }
+
+    /* Stunts */
+    .stunts{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .stunt-card{
+      position: relative;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      padding: 12px;
+    }
+    .delete-stunt{
+      position:absolute;
+      right: 10px;
+      top: 8px;
+      width: 28px; height: 28px;
+      border-radius: 10px;
+      border: 1px solid rgba(231,76,60,0.35);
+      background: rgba(231,76,60,0.12);
+      color: var(--danger);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-weight: 900;
+      opacity: 0.9;
+    }
+    .delete-stunt:hover{ filter: brightness(1.1); }
+
+    .stunt-name-input{ font-weight: 900; margin-bottom: 8px; }
+    .stunt-desc-input{ min-height: 70px; }
+
+    /* Power manual */
+    .power-manual{
+      border-radius: 14px;
+      border: 1px solid rgba(136,96,208,0.25);
+      background: rgba(136,96,208,0.06);
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .power-manual .title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .tier-header{
+      font-weight: 900;
+      color: rgba(136,96,208,0.95);
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+    .limits-head{
+      color: rgba(231,76,60,0.95) !important;
+    }
+
+    /* Toast */
+    .toast-wrap{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      z-index: 9999;
+      max-width: min(440px, calc(100vw - 28px));
+    }
+    .toast{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(23,23,34,0.92);
+      box-shadow: var(--shadow);
+      padding: 12px 12px;
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      backdrop-filter: blur(10px);
+      animation: pop 0.18s ease-out;
+    }
+    .toast .icon{ width: 22px; text-align:center; margin-top: 1px; }
+    .toast .msg{ flex:1; }
+    .toast .msg b{ display:block; margin-bottom: 2px; }
+    .toast .x{
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      cursor:pointer;
+    }
+    @keyframes pop{
+      from{ transform: translateY(6px); opacity: 0; }
+      to{ transform: translateY(0px); opacity: 1; }
+    }
+
+    /* Small helpers */
+    .row{ display:flex; gap: 10px; align-items:center; }
+    .muted{ color: var(--muted); }
+    .divider{ height:1px; background: rgba(255,255,255,0.08); margin: 12px 0; }
+  </style>
+</head>
+
+<body>
+  <datalist id="fateSkills">
+    <option value="Academics"><option value="Athletics"><option value="Burglary"><option value="Contacts">
+    <option value="Crafts"><option value="Deceive"><option value="Drive"><option value="Empathy">
+    <option value="Fight"><option value="Investigate"><option value="Lore"><option value="Notice">
+    <option value="Physique"><option value="Provoke"><option value="Rapport"><option value="Resources">
+    <option value="Shoot"><option value="Stealth"><option value="Will">
+  </datalist>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-row">
+      <input type="file" id="fileInput" style="display:none" onchange="loadCharacter(this)" accept="application/json" />
+      <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📂 Load JSON</button>
+      <button class="btn btn-secondary" onclick="saveCharacter()">💾 Save JSON</button>
+
+      <button class="btn btn-ghost" onclick="restoreAutosave()">↩️ Restore Autosave</button>
+      <button class="btn btn-ghost" onclick="clearAutosave()">🧹 Clear Autosave</button>
+
+      <div class="webhook">
+        <label for="webhookUrl">🔗 Webhook</label>
+        <input type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." />
+        <button class="mini-btn" onclick="testWebhook()" title="Test webhook (sends a tiny message)">✅</button>
+      </div>
+
+      <div class="spacer"></div>
+
+      <button class="btn btn-success" onclick="sendFullSheet()">📤 Send Sheet</button>
+    </div>
+    <div class="topbar-row" style="margin-top:10px;">
+      <span class="subtle">Shortcuts:</span>
+      <span class="subtle">Ctrl/⌘ + S = Save JSON</span>
+      <span class="subtle">Ctrl/⌘ + O = Load JSON</span>
+      <span class="subtle">Autosaves locally as you edit.</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- LEFT COLUMN -->
+    <div>
+      <!-- IMAGE -->
+      <div class="card">
+        <div class="card-header">
+          <h3>🖼️ Portrait</h3>
+          <button class="mini-btn" onclick="copyImageUrl()" title="Copy image URL">📋</button>
+        </div>
+        <div class="image-wrap">
+          <div class="img-box">
+            <img id="charImage" src="https://placehold.co/400x600/333333/ffffff?text=No+Image" alt="Character portrait" />
+          </div>
+          <input type="text" id="imageUrlInput" placeholder="Paste Image URL..." oninput="updateImage()" />
+        </div>
+      </div>
+
+      <!-- POWER -->
+      <div class="card" style="margin-top:16px; border-color: rgba(136,96,208,0.25);">
+        <div class="card-header">
+          <h3>⚡ Power</h3>
+          <div class="row">
+            <button class="mini-btn" onclick="sendPowerStatus()" title="Send Power Status">📨</button>
+          </div>
+        </div>
+        <div class="card-inner">
+          <input type="text" id="powerName" class="clean-input" value="Primary Power" />
+
+          <div class="divider"></div>
+
+          <div class="track">
+            <div class="track-row">
+              <span class="muted">Power Stress</span>
+              <div class="track-controls">
+                <button class="track-btn" onclick="adjustTrack('powerTrack', -1)">−</button>
+                <button class="track-btn" onclick="adjustTrack('powerTrack', 1)">+</button>
+              </div>
+            </div>
+            <div class="stress-track" id="powerTrack" data-count="3"></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="cond">
+            <div class="condition-row">
+              <input type="checkbox" id="pcond1-chk" />
+              <div>
+                <input type="text" id="pcond1-name" class="name" placeholder="Condition 1 (e.g. Winded)" />
+                <input type="text" id="pcond1-desc" class="desc" placeholder="Effect (e.g. -2 actions)" />
+              </div>
+            </div>
+            <div class="condition-row">
+              <input type="checkbox" id="pcond2-chk" />
+              <div>
+                <input type="text" id="pcond2-name" class="name" placeholder="Condition 2 (e.g. Burned Out)" />
+                <input type="text" id="pcond2-desc" class="desc" placeholder="Effect (e.g. Power Offline)" />
+              </div>
+            </div>
+            <div class="condition-row">
+              <input type="checkbox" id="pcond3-chk" />
+              <div>
+                <input type="text" id="pcond3-name" class="name" placeholder="Condition 3 (e.g. Scarred)" />
+                <input type="text" id="pcond3-desc" class="desc" placeholder="Effect (e.g. Permanent change)" />
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="power-manual">
+            <div class="title">
+              <b>⚡ Manual: Cost per Effect</b>
+              <span class="subtle">Saved in JSON</span>
+            </div>
+
+            <div>
+              <input type="text" id="tier1-head" class="tier-header" value="Tier 1 (1 Box)" />
+              <textarea id="tier1-text" placeholder="- Effect 1&#10;- Effect 2"></textarea>
+            </div>
+
+            <div>
+              <input type="text" id="tier2-head" class="tier-header" value="Tier 2 (2 Boxes)" />
+              <textarea id="tier2-text" placeholder="- Effect 1&#10;- Effect 2"></textarea>
+            </div>
+
+            <div>
+              <input type="text" id="tier3-head" class="tier-header" value="Tier 3 (3 Boxes)" />
+              <textarea id="tier3-text" placeholder="- Effect 1&#10;- Effect 2"></textarea>
+            </div>
+
+            <div>
+              <input type="text" id="limit-head" class="tier-header limits-head" value="🚫 Limits" />
+              <textarea id="limit-text" placeholder="Weaknesses or constraints..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HEALTH -->
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header">
+          <h3>🚑 Health & Stress</h3>
+          <button class="mini-btn" onclick="sendStressStatus()" title="Send Health">📨</button>
+        </div>
+        <div class="card-inner">
+          <div class="track">
+            <div class="track-row">
+              <span>Physical</span>
+              <div class="track-controls">
+                <button class="track-btn" onclick="adjustTrack('track1', -1)">−</button>
+                <button class="track-btn" onclick="adjustTrack('track1', 1)">+</button>
+              </div>
+            </div>
+            <div class="stress-track" id="track1" data-count="3"></div>
+
+            <div class="track-row" style="margin-top:10px;">
+              <span>Mental</span>
+              <div class="track-controls">
+                <button class="track-btn" onclick="adjustTrack('track2', -1)">−</button>
+                <button class="track-btn" onclick="adjustTrack('track2', 1)">+</button>
+              </div>
+            </div>
+            <div class="stress-track" id="track2" data-count="3"></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <div class="subtle" style="margin-bottom:8px;">Active Complications</div>
+            <textarea id="consequences" rows="3" placeholder="Mild: ...&#10;Moderate: ..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+      <!-- IDENTITY -->
+      <div class="card">
+        <div class="card-header">
+          <h3>🧑 Character</h3>
+          <div class="row">
+            <button class="mini-btn" onclick="sendFateUpdate()" title="Send Fate Points">🪙</button>
+          </div>
+        </div>
+
+        <div class="identity">
+          <div>
+            <input type="text" id="charName" class="clean-input" placeholder="Character Name" />
+            <div style="height:10px;"></div>
+            <textarea id="charDesc" placeholder="Character description, pronouns, background..." rows="2"></textarea>
+            <div style="height:10px;"></div>
+            <input type="text" id="charConcept" placeholder="High Concept (e.g. Knight of the Cross)" />
+          </div>
+
+          <div class="fp">
+            <input type="number" id="fatePoints" value="3" />
+            <div class="label">Fate Pts</div>
+            <button class="btn btn-secondary" style="width:100%;" onclick="sendFateUpdate()">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ASPECTS -->
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header">
+          <h3>📜 Aspects</h3>
+          <button class="mini-btn" onclick="sendAspects()" title="Send Aspects">📨</button>
+        </div>
+        <div class="card-inner stack" id="aspects-list">
+          <input type="text" id="aspect-trouble" placeholder="Trouble Aspect" />
+          <input type="text" class="generic-aspect" placeholder="Aspect 3" />
+          <input type="text" class="generic-aspect" placeholder="Aspect 4" />
+          <input type="text" class="generic-aspect" placeholder="Aspect 5" />
+        </div>
+      </div>
+
+      <!-- SKILLS -->
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header">
+          <h3>📊 Skills</h3>
+          <button class="mini-btn" onclick="sendSkills()" title="Send Skills">📨</button>
+        </div>
+
+        <div class="card-inner skills" id="skills-area">
+          <!-- +4 -->
+          <div class="skill-tier">
+            <span class="skill-val">+4</span>
+            <div class="skill-container">
+              <div class="skill-chip-wrapper">
+                <input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 4, event)" />
+                <button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 4, event)" title="Roll">🎲</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- +3 -->
+          <div class="skill-tier">
+            <span class="skill-val">+3</span>
+            <div class="skill-container">
+              <div class="skill-chip-wrapper">
+                <input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 3, event)" />
+                <button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 3, event)" title="Roll">🎲</button>
+              </div>
+              <div class="skill-chip-wrapper">
+                <input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 3, event)" />
+                <button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 3, event)" title="Roll">🎲</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- +2 -->
+          <div class="skill-tier">
+            <span class="skill-val">+2</span>
+            <div class="skill-container">
+              <div class="skill-chip-wrapper">
+                <input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 2, event)" />
+                <button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 2, event)" title="Roll">🎲</button>
+              </div>
+              <div class="skill-chip-wrapper">
+                <input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 2, event)" />
+                <button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 2, event)" title="Roll">🎲</button>
+              </div>
+              <div class="skill-chip-wrapper">
+                <input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 2, event)" />
+                <button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 2, event)" title="Roll">🎲</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- +1 -->
+          <div class="skill-tier">
+            <span class="skill-val">+1</span>
+            <div class="skill-container">
+              <div class="skill-chip-wrapper">
+                <input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 1, event)" />
+                <button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 1, event)" title="Roll">🎲</button>
+              </div>
+              <div class="skill-chip-wrapper">
+                <input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 1, event)" />
+                <button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 1, event)" title="Roll">🎲</button>
+              </div>
+              <div class="skill-chip-wrapper">
+                <input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 1, event)" />
+                <button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 1, event)" title="Roll">🎲</button>
+              </div>
+              <div class="skill-chip-wrapper">
+                <input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 1, event)" />
+                <button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 1, event)" title="Roll">🎲</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- +0 -->
+          <div class="skill-tier" style="border-style: solid; border-color: rgba(255,255,255,0.07);">
+            <span class="skill-val" style="color: rgba(233,233,242,0.45); border-color: rgba(255,255,255,0.10); background: rgba(255,255,255,0.03);">+0</span>
+            <div class="skill-container">
+              <!-- 9 slots -->
+              <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0, event)" /><button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 0, event)" title="Roll">🎲</button></div>
+              <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0, event)" /><button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 0, event)" title="Roll">🎲</button></div>
+              <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0, event)" /><button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 0, event)" title="Roll">🎲</button></div>
+              <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0, event)" /><button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 0, event)" title="Roll">🎲</button></div>
+              <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0, event)" /><button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 0, event)" title="Roll">🎲</button></div>
+              <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0, event)" /><button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 0, event)" title="Roll">🎲</button></div>
+              <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0, event)" /><button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 0, event)" title="Roll">🎲</button></div>
+              <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0, event)" /><button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 0, event)" title="Roll">🎲</button></div>
+              <div class="skill-chip-wrapper"><input type="text" class="skill-input" placeholder="Skill" list="fateSkills" onclick="rollSkill(this, 0, event)" /><button class="skill-dice" onclick="rollSkill(this.previousElementSibling, 0, event)" title="Roll">🎲</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUNTS -->
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header">
+          <h3>⚡ Stunts</h3>
+          <button class="mini-btn" onclick="sendStunts()" title="Send Stunts">📨</button>
+        </div>
+        <div class="card-inner">
+          <div class="stunts" id="stunts-list"></div>
+          <button class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="addStunt()">+ Add Stunt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+/* =========================
+   Helpers / UX
+========================= */
+const AUTOSAVE_KEY = "fate_sheet_autosave_v2";
+const AUTOSAVE_WEBHOOK_KEY = "fate_sheet_webhook_v2";
+
+function toast(title, message, type="info", timeout=2600){
+  const wrap = document.getElementById("toastWrap");
+  const el = document.createElement("div");
+  el.className = "toast";
+  const icon = type==="success" ? "✅" : type==="error" ? "⚠️" : type==="warn" ? "🟡" : "ℹ️";
+  el.innerHTML = `
+    <div class="icon">${icon}</div>
+    <div class="msg"><b>${escapeHtml(title)}</b><div>${escapeHtml(message)}</div></div>
+    <button class="x" aria-label="Dismiss">✕</button>
+  `;
+  el.querySelector(".x").onclick = ()=> el.remove();
+  wrap.appendChild(el);
+  if(timeout){
+    setTimeout(()=> { if(el.isConnected) el.remove(); }, timeout);
+  }
+}
+
+function escapeHtml(str){
+  return String(str ?? "").replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[s]));
+}
+
+function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+function sanitizeFilename(name){
+  const base = (name || "character").trim() || "character";
+  return base.replace(/[^\w\- ]+/g, "").replace(/\s+/g, "_").slice(0, 64) || "character";
+}
+
+function trimTo(str, max){
+  str = String(str ?? "");
+  return str.length > max ? str.slice(0, max-1) + "…" : str;
+}
+
+function safeGet(obj, path, fallback){
+  try{
+    return path.split(".").reduce((acc,k)=> (acc && acc[k] !== undefined ? acc[k] : undefined), obj) ?? fallback;
+  }catch(_){
+    return fallback;
+  }
+}
+
+/* =========================
+   Stress Tracks
+========================= */
+function readTrackState(trackId){
+  const track = document.getElementById(trackId);
+  return Array.from(track.querySelectorAll(".stress-box")).map(b => b.getAttribute("aria-pressed")==="true");
+}
+
+function renderStress(trackId, mode="stress"){
+  const track = document.getElementById(trackId);
+  const count = parseInt(track.getAttribute("data-count") || "0", 10);
+  const prev = readTrackState(trackId);
+  track.innerHTML = "";
+
+  for(let i=1; i<=count; i++){
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "stress-box" + (mode==="power" ? " power-box" : "");
+    btn.textContent = i;
+    const active = !!prev[i-1];
+    btn.setAttribute("aria-pressed", active ? "true" : "false");
+
+    btn.addEventListener("click", ()=>{
+      const now = btn.getAttribute("aria-pressed")==="true";
+      btn.setAttribute("aria-pressed", now ? "false" : "true");
+      scheduleAutosave();
+    });
+
+    btn.addEventListener("keydown", (e)=>{
+      if(e.key==="Enter" || e.key===" "){
+        e.preventDefault();
+        btn.click();
+      }
+    });
+
+    track.appendChild(btn);
+  }
+}
+
+function adjustTrack(trackId, change){
+  const track = document.getElementById(trackId);
+  let count = parseInt(track.getAttribute("data-count") || "0", 10);
+  count = clamp(count + change, 0, 10);
+  track.setAttribute("data-count", String(count));
+  renderStress(trackId, trackId==="powerTrack" ? "power" : "stress");
+  scheduleAutosave();
+}
+
+/* =========================
+   Stunts
+========================= */
+function addStunt(name="", desc=""){
+  const list = document.getElementById("stunts-list");
+  const div = document.createElement("div");
+  div.className = "stunt-card";
+  div.innerHTML = `
+    <div class="delete-stunt" title="Delete stunt" role="button" aria-label="Delete stunt">×</div>
+    <input type="text" class="stunt-name-input" placeholder="Stunt Name" value="${escapeHtml(name)}">
+    <textarea class="stunt-desc-input" placeholder="Effect/Description" rows="2">${escapeHtml(desc)}</textarea>
+  `;
+  div.querySelector(".delete-stunt").onclick = ()=> { div.remove(); scheduleAutosave(); };
+  div.querySelectorAll("input,textarea").forEach(el=> el.addEventListener("input", scheduleAutosave));
+  list.appendChild(div);
+}
+
+/* =========================
+   Image
+========================= */
+function updateImage(){
+  const url = document.getElementById("imageUrlInput").value.trim();
+  document.getElementById("charImage").src = url || "https://placehold.co/400x600/333333/ffffff?text=No+Image";
+  scheduleAutosave();
+}
+
+function copyImageUrl(){
+  const url = document.getElementById("imageUrlInput").value.trim();
+  if(!url){ toast("Copy", "No image URL to copy.", "warn"); return; }
+  navigator.clipboard?.writeText(url)
+    .then(()=> toast("Copied", "Image URL copied to clipboard.", "success"))
+    .catch(()=> toast("Copy failed", "Clipboard permission denied.", "error"));
+}
+
+/* =========================
+   Data model (same JSON shape)
+========================= */
+function getSheetData(){
+  const healthIds = ["track1","track2"];
+  const health = healthIds.map(id => {
+    const el = document.getElementById(id);
+    return {
+      id,
+      count: el.getAttribute("data-count"),
+      active: Array.from(el.querySelectorAll(".stress-box")).map(b => b.getAttribute("aria-pressed")==="true")
+    };
+  });
+
+  const powerTrackEl = document.getElementById("powerTrack");
+
+  return {
+    meta: {
+      name: document.getElementById("charName").value,
+      img: document.getElementById("imageUrlInput").value,
+      fatePoints: document.getElementById("fatePoints").value
+    },
+    webhook: document.getElementById("webhookUrl").value,
+    header: {
+      concept: document.getElementById("charConcept").value,
+      desc: document.getElementById("charDesc").value
+    },
+    aspects: {
+      trouble: document.getElementById("aspect-trouble").value,
+      others: Array.from(document.querySelectorAll(".generic-aspect")).map(el => el.value)
+    },
+    health,
+    consequences: document.getElementById("consequences").value,
+    power: {
+      name: document.getElementById("powerName").value,
+      track: {
+        count: powerTrackEl.getAttribute("data-count"),
+        active: Array.from(powerTrackEl.querySelectorAll(".stress-box")).map(b => b.getAttribute("aria-pressed")==="true")
+      },
+      conditions: [1,2,3].map(i => ({
+        checked: document.getElementById(`pcond${i}-chk`).checked,
+        name: document.getElementById(`pcond${i}-name`).value,
+        desc: document.getElementById(`pcond${i}-desc`).value
+      })),
+      manual: {
+        t1h: document.getElementById("tier1-head").value, t1t: document.getElementById("tier1-text").value,
+        t2h: document.getElementById("tier2-head").value, t2t: document.getElementById("tier2-text").value,
+        t3h: document.getElementById("tier3-head").value, t3t: document.getElementById("tier3-text").value,
+        lh: document.getElementById("limit-head").value, lt: document.getElementById("limit-text").value
+      }
+    },
+    skills: Array.from(document.querySelectorAll(".skill-tier")).map(tier => ({
+      bonus: tier.querySelector(".skill-val")?.innerText ?? "",
+      skills: Array.from(tier.querySelectorAll(".skill-input")).map(i => i.value)
+    })),
+    stunts: Array.from(document.querySelectorAll(".stunt-card")).map(card => ({
+      name: card.querySelector(".stunt-name-input")?.value ?? "",
+      desc: card.querySelector(".stunt-desc-input")?.value ?? ""
+    }))
+  };
+}
+
+function applySheetData(data){
+  // meta
+  document.getElementById("charName").value = safeGet(data, "meta.name", "");
+  document.getElementById("imageUrlInput").value = safeGet(data, "meta.img", "");
+  document.getElementById("fatePoints").value = safeGet(data, "meta.fatePoints", "3");
+  updateImage();
+
+  // webhook
+  document.getElementById("webhookUrl").value = safeGet(data, "webhook", "");
+
+  // header
+  document.getElementById("charConcept").value = safeGet(data, "header.concept", "");
+  document.getElementById("charDesc").value = safeGet(data, "header.desc", "");
+
+  // aspects
+  document.getElementById("aspect-trouble").value = safeGet(data, "aspects.trouble", "");
+  const aspInputs = document.querySelectorAll(".generic-aspect");
+  const others = safeGet(data, "aspects.others", []);
+  others.forEach((v, i) => { if(aspInputs[i]) aspInputs[i].value = v; });
+
+  // health
+  const health = safeGet(data, "health", []);
+  health.forEach(h => {
+    if(!h || !h.id) return;
+    const el = document.getElementById(h.id);
+    if(!el) return;
+    el.setAttribute("data-count", String(h.count ?? el.getAttribute("data-count") ?? "3"));
+    renderStress(h.id, "stress");
+    const boxes = Array.from(el.querySelectorAll(".stress-box"));
+    (h.active || []).forEach((on, idx)=> { if(boxes[idx]) boxes[idx].setAttribute("aria-pressed", on ? "true" : "false"); });
+  });
+
+  document.getElementById("consequences").value = safeGet(data, "consequences", "");
+
+  // power
+  const power = safeGet(data, "power", null);
+  if(power){
+    document.getElementById("powerName").value = safeGet(power, "name", "Primary Power");
+    const pt = document.getElementById("powerTrack");
+    pt.setAttribute("data-count", String(safeGet(power, "track.count", pt.getAttribute("data-count") ?? "3")));
+    renderStress("powerTrack", "power");
+    const boxes = Array.from(pt.querySelectorAll(".stress-box"));
+    (safeGet(power, "track.active", []) || []).forEach((on, idx)=> { if(boxes[idx]) boxes[idx].setAttribute("aria-pressed", on ? "true" : "false"); });
+
+    const cond = safeGet(power, "conditions", []);
+    cond.forEach((c, i) => {
+      const idx = i+1;
+      if(idx>3) return;
+      document.getElementById(`pcond${idx}-chk`).checked = !!c.checked;
+      document.getElementById(`pcond${idx}-name`).value = c.name ?? "";
+      document.getElementById(`pcond${idx}-desc`).value = c.desc ?? "";
+    });
+
+    const manual = safeGet(power, "manual", {});
+    document.getElementById("tier1-head").value = safeGet(manual, "t1h", document.getElementById("tier1-head").value);
+    document.getElementById("tier1-text").value = safeGet(manual, "t1t", "");
+    document.getElementById("tier2-head").value = safeGet(manual, "t2h", document.getElementById("tier2-head").value);
+    document.getElementById("tier2-text").value = safeGet(manual, "t2t", "");
+    document.getElementById("tier3-head").value = safeGet(manual, "t3h", document.getElementById("tier3-head").value);
+    document.getElementById("tier3-text").value = safeGet(manual, "t3t", "");
+    document.getElementById("limit-head").value = safeGet(manual, "lh", document.getElementById("limit-head").value);
+    document.getElementById("limit-text").value = safeGet(manual, "lt", "");
+  }
+
+  // skills
+  const tiers = document.querySelectorAll(".skill-tier");
+  const skills = safeGet(data, "skills", []);
+  skills.forEach((dTier, i) => {
+    if(!tiers[i]) return;
+    const inputs = tiers[i].querySelectorAll(".skill-input");
+    (dTier.skills || []).forEach((sVal, k) => { if(inputs[k]) inputs[k].value = sVal; });
+  });
+
+  // stunts
+  const stuntList = safeGet(data, "stunts", []);
+  document.getElementById("stunts-list").innerHTML = "";
+  if(stuntList.length){
+    stuntList.forEach(s => addStunt(s.name || "", s.desc || ""));
+  }else{
+    addStunt();
+  }
+}
+
+/* =========================
+   Save / Load JSON (same format)
+========================= */
+function saveCharacter(){
+  const data = getSheetData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = sanitizeFilename(data.meta?.name) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  toast("Saved", "JSON downloaded.", "success");
+}
+
+function loadCharacter(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      applySheetData(data);
+      persistAutosave(); // after load, sync autosave
+      toast("Loaded", "Character JSON loaded.", "success");
+    }catch(err){
+      console.error(err);
+      toast("Load failed", "That file wasn't valid JSON for this sheet.", "error", 4200);
+    }finally{
+      input.value = ""; // allow re-loading same file
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* =========================
+   Autosave (localStorage)
+========================= */
+let autosaveTimer = null;
+
+function scheduleAutosave(){
+  if(autosaveTimer) clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(persistAutosave, 350);
+}
+
+function persistAutosave(){
+  try{
+    const data = getSheetData();
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
+    localStorage.setItem(AUTOSAVE_WEBHOOK_KEY, document.getElementById("webhookUrl").value || "");
+  }catch(e){
+    // ignore
+  }
+}
+
+function restoreAutosave(){
+  try{
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    if(!raw){ toast("Restore", "No autosave found.", "warn"); return; }
+    applySheetData(JSON.parse(raw));
+    toast("Restored", "Autosave restored.", "success");
+  }catch(e){
+    toast("Restore failed", "Autosave was corrupted.", "error", 4200);
+  }
+}
+
+function clearAutosave(){
+  localStorage.removeItem(AUTOSAVE_KEY);
+  toast("Cleared", "Autosave cleared.", "success");
+}
+
+/* =========================
+   Discord
+========================= */
+async function sendToDiscord(embedData, overrideTitle=null){
+  const webhookUrl = document.getElementById("webhookUrl").value.trim();
+  if(!webhookUrl){
+    toast("Webhook missing", "Paste a Discord webhook URL first.", "warn", 3600);
+    return;
+  }
+
+  const charName = document.getElementById("charName").value || "Fate Character";
+  const imgUrl = document.getElementById("imageUrlInput").value.trim();
+
+  // Discord limits (practical guards)
+  // title <= 256, description <= 4096, field.name <= 256, field.value <= 1024
+  if(embedData.title) embedData.title = trimTo(embedData.title, 256);
+  if(embedData.description) embedData.description = trimTo(embedData.description, 4096);
+  if(embedData.fields){
+    embedData.fields = embedData.fields.slice(0, 25).map(f => ({
+      name: trimTo(f.name ?? "", 256),
+      value: trimTo(f.value ?? "", 1024),
+      inline: !!f.inline
+    }));
+  }
+
+  const payload = {
+    username: overrideTitle || charName,
+    embeds: [embedData]
+  };
+  if(imgUrl) payload.avatar_url = imgUrl;
+
+  try{
+    const res = await fetch(webhookUrl, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if(!res.ok){
+      const txt = await res.text();
+      toast("Discord error", `${res.status} ${res.statusText}`, "error", 5200);
+      console.error("Discord error body:", txt);
+    }else{
+      toast("Sent", "Message posted to Discord.", "success");
+    }
+  }catch(e){
+    console.error(e);
+    toast("Network error", "Local files can hit Discord CORS blocks. Try hosting the HTML or using a browser setting.", "error", 5200);
+  }
+}
+
+async function testWebhook(){
+  await sendToDiscord({
+    title: "✅ Webhook Test",
+    description: "If you can read this, your webhook works.",
+    color: 5763719
+  }, "Fate Sheet");
+}
+
+/* =========================
+   Senders (same features, safer formatting)
+========================= */
+function sendFateUpdate(){
+  const fp = document.getElementById("fatePoints").value;
+  sendToDiscord({
+    title: "🪙 Fate Points Updated",
+    description: `Current Fate Points: **${fp}**`,
+    color: 15844367
+  });
+}
+
+function sendPowerStatus(){
+  const pName = document.getElementById("powerName").value || "Power";
+  const active = document.querySelectorAll("#powerTrack .stress-box[aria-pressed='true']").length;
+  const total = document.getElementById("powerTrack").getAttribute("data-count") || "0";
+
+  let status = "";
+  [1,2,3].forEach(i => {
+    const chk = document.getElementById(`pcond${i}-chk`).checked ? "✅" : "⬜";
+    const name = document.getElementById(`pcond${i}-name`).value.trim();
+    if(name) status += `${chk} **${name}**\n`;
+  });
+
+  sendToDiscord({
+    title: `⚡ ${pName} Status`,
+    color: 8937680,
+    description: `**Stress:** ${active} / ${total}\n\n**Conditions:**\n${status || "None"}`
+  });
+}
+
+function sendAspects(){
+  let txt = `**High Concept:** ${document.getElementById("charConcept").value || "—"}\n`;
+  txt += `**Trouble:** ${document.getElementById("aspect-trouble").value || "—"}\n`;
+  document.querySelectorAll(".generic-aspect").forEach(i => {
+    const v = i.value.trim();
+    if(v) txt += `• ${v}\n`;
+  });
+
+  sendToDiscord({ title: "📜 Aspects", description: txt, color: 15105570 });
+}
+
+function sendSkills(){
+  let txt = "";
+  document.querySelectorAll(".skill-tier").forEach(t => {
+    const b = t.querySelector(".skill-val")?.innerText ?? "";
+    const s = Array.from(t.querySelectorAll(".skill-input")).map(i=>i.value.trim()).filter(Boolean).join(", ");
+    if(s) txt += `**${b}**: ${s}\n`;
+  });
+  sendToDiscord({ title: "📊 Skills", description: txt || "None", color: 3447003 });
+}
+
+function sendStunts(){
+  let txt = "";
+  document.querySelectorAll(".stunt-card").forEach(c => {
+    const sn = c.querySelector(".stunt-name-input")?.value.trim();
+    const sd = c.querySelector(".stunt-desc-input")?.value.trim();
+    if(sn) txt += `**${sn}**\n${sd || "—"}\n\n`;
+  });
+  sendToDiscord({ title: "⚡ Stunts", description: txt || "None", color: 10181046 });
+}
+
+function sendStressStatus(){
+  const p = document.querySelectorAll("#track1 .stress-box[aria-pressed='true']").length + "/" + (document.getElementById("track1").getAttribute("data-count") || "0");
+  const m = document.querySelectorAll("#track2 .stress-box[aria-pressed='true']").length + "/" + (document.getElementById("track2").getAttribute("data-count") || "0");
+  const c = document.getElementById("consequences").value.trim();
+  sendToDiscord({ title: "🚑 Health Status", description: `**Physical:** ${p}\n**Mental:** ${m}\n\n**Complications:**\n${c || "None"}`, color: 15548997 });
+}
+
+function sendFullSheet(){
+  const name = document.getElementById("charName").value.trim() || "Unknown";
+  const concept = document.getElementById("charConcept").value.trim() || "No Concept";
+  const desc = document.getElementById("charDesc").value.trim();
+  const fp = document.getElementById("fatePoints").value;
+
+  // Aspects
+  let aspectTxt = `**Trouble:** ${document.getElementById("aspect-trouble").value.trim() || "—"}\n`;
+  document.querySelectorAll(".generic-aspect").forEach(i => {
+    const v = i.value.trim();
+    if(v) aspectTxt += `• ${v}\n`;
+  });
+
+  // Power
+  const pName = document.getElementById("powerName").value.trim() || "Power";
+  const pStress = document.querySelectorAll("#powerTrack .stress-box[aria-pressed='true']").length + "/" + (document.getElementById("powerTrack").getAttribute("data-count") || "0");
+  let pCond = "";
+  [1,2,3].forEach(i => {
+    const chk = document.getElementById(`pcond${i}-chk`).checked ? "✅" : "⬜";
+    const nm = document.getElementById(`pcond${i}-name`).value.trim();
+    if(nm) pCond += `${chk} ${nm}\n`;
+  });
+  const limits = document.getElementById("limit-text").value.trim();
+  const powerFull = `**Stress:** ${pStress}\n\n**Conditions:**\n${pCond || "None"}\n\n**Limits:**\n${limits || "None"}`;
+
+  // Health
+  const hStress = document.querySelectorAll("#track1 .stress-box[aria-pressed='true']").length + "/" + (document.getElementById("track1").getAttribute("data-count") || "0");
+  const mStress = document.querySelectorAll("#track2 .stress-box[aria-pressed='true']").length + "/" + (document.getElementById("track2").getAttribute("data-count") || "0");
+  const conseq = document.getElementById("consequences").value.trim();
+
+  // Skills (short list for embed)
+  let skillList = "";
+  document.querySelectorAll(".skill-tier").forEach(t => {
+    const b = t.querySelector(".skill-val")?.innerText ?? "";
+    const s = Array.from(t.querySelectorAll(".skill-input")).map(i=>i.value.trim()).filter(Boolean);
+    if(s.length) skillList += `**${b}**: ${s.join(", ")}\n`;
+  });
+
+  // Stunts
+  let stuntTxt = "";
+  document.querySelectorAll(".stunt-card").forEach(c => {
+    const sn = c.querySelector(".stunt-name-input")?.value.trim();
+    const sd = c.querySelector(".stunt-desc-input")?.value.trim();
+    if(sn) stuntTxt += `**${sn}**: ${sd || "—"}\n`;
+  });
+
+  const thumb = document.getElementById("imageUrlInput").value.trim();
+  sendToDiscord({
+    title: name,
+    description: `${trimTo(`*${concept}*\n\n${desc}\n\n🪙 **Fate Points:** ${fp}`, 4096)}`,
+    color: 5945834,
+    fields: [
+      { name: "📜 Aspects", value: trimTo(aspectTxt || "None", 1024), inline: false },
+      { name: `⚡ ${trimTo(pName, 60)}`, value: trimTo(powerFull || "None", 1024), inline: true },
+      { name: "🚑 Health", value: trimTo(`**Phys:** ${hStress}\n**Men:** ${mStress}\n\n**Consequences:**\n${conseq || "None"}`, 1024), inline: true },
+      { name: "📊 Skills", value: trimTo(skillList || "None", 1024), inline: false },
+      { name: "⚡ Stunts", value: trimTo(stuntTxt || "None", 1024), inline: false },
+    ],
+    thumbnail: thumb ? { url: thumb } : undefined
+  });
+}
+
+/* =========================
+   Dice / Skill rolling
+========================= */
+function roll4df(){
+  let total = 0;
+  let symbols = "";
+  for(let i=0; i<4; i++){
+    const r = Math.floor(Math.random()*3)-1; // -1,0,1
+    total += r;
+    symbols += (r===-1 ? "➖" : (r===0 ? "⬜" : "➕"));
+  }
+  return { total, symbols };
+}
+
+function rollSkill(input, bonus, evt){
+  // Stop button clicks from focusing weirdly
+  if(evt) evt.preventDefault();
+
+  const skill = (input?.value || "").trim();
+  if(!skill){
+    toast("No skill", "Pick/enter a skill name first.", "warn");
+    return;
+  }
+
+  const r = roll4df();
+  const result = r.total + (Number(bonus) || 0);
+  const signed = (r.total>0 ? "+" : "") + r.total;
+
+  sendToDiscord({
+    title: `🎲 ${skill} (${bonus>=0?"+":""}${bonus})`,
+    description: `**Dice:** ${r.symbols} (${signed})\n**Result:** **${result}**`,
+    color: 5945834
+  });
+}
+
+/* =========================
+   Init
+========================= */
+function wireAutosave(){
+  document.querySelectorAll("input, textarea").forEach(el => {
+    // don't autosave on file input change; handled by load
+    if(el.id === "fileInput") return;
+    el.addEventListener("input", scheduleAutosave);
+    el.addEventListener("change", scheduleAutosave);
+  });
+}
+
+function init(){
+  // Restore webhook from local storage (doesn't change JSON compatibility)
+  try{
+    const w = localStorage.getItem(AUTOSAVE_WEBHOOK_KEY);
+    if(w && !document.getElementById("webhookUrl").value) document.getElementById("webhookUrl").value = w;
+  }catch(_){}
+
+  renderStress("powerTrack","power");
+  renderStress("track1","stress");
+  renderStress("track2","stress");
+
+  if(document.getElementById("stunts-list").children.length === 0){
+    addStunt();
+  }
+
+  wireAutosave();
+
+  // Keyboard shortcuts
+  window.addEventListener("keydown", (e)=>{
+    const isMac = navigator.platform.toLowerCase().includes("mac");
+    const mod = isMac ? e.metaKey : e.ctrlKey;
+
+    if(mod && e.key.toLowerCase()==="s"){
+      e.preventDefault();
+      saveCharacter();
+    }
+    if(mod && e.key.toLowerCase()==="o"){
+      e.preventDefault();
+      document.getElementById("fileInput").click();
+    }
+  });
+
+  toast("Ready", "Sheet loaded. Autosave is on.", "success", 2200);
+}
+
+window.addEventListener("load", init);
+</script>
+</body>
+</html>
